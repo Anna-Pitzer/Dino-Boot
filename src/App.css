@@ -1,0 +1,23 @@
+:root {
+  --game-bg: #1a2540;
+  --game-bg-2: #304269;
+  --game-accent: #F26101;
+  --game-accent-hover: #ff7f1a;
+  --game-blue-light: #91BED4;
+  --game-blue-lighter: #D9E8F5;
+  --game-white: #ffffff;
+  --game-success: #4caf50;
+  --game-error: #f44336;
+  --game-font: 'Press Start 2P', cursive;
+}
+
+.screen-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-size: 20px;
+  color: var(--game-white);
+  background: var(--game-bg);
+  font-family: var(--game-font);
+}

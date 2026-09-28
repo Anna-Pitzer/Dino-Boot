@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Calibração de Caminhos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a2540; font-family: monospace; color: white; user-select: none; }
+
+    h2 {
+      text-align: center;
+      padding: 10px;
+      font-size: 13px;
+      background: #304269;
+      letter-spacing: 2px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      padding: 8px 16px;
+      background: #0d1520;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .btn-waypoint { background: #3498db; color: white; }
+    .btn-connect  { background: #2ecc71; color: #000; }
+    .btn-delete   { background: #e74c3c; color: white; }
+    .btn-copy     { background: #F26101; color: white; }
+    .btn-undo     { background: #555;    color: white; }
+    .btn-connect.active { background: #27ae60; box-shadow: 0 0 8px #2ecc71; }
+
+    .mode-label { font-size: 11px; color: #91BED4; margin-left: 8px; }
+
+    .map-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      padding: 12px 16px;
+    }
+
+    .map-wrapper img {
+      max-width: 100%;
+      max-height: 72vh;
+      display: block;
+      border: 3px solid #F26101;
+      border-radius: 8px;
+      pointer-events: none;
+      drag: none;
+    }
+
+    svg.overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    .waypoint {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #3498db;
+      border: 2px solid white;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: bold;
+      color: white;
+      z-index: 10;
+    }
+
+    .waypoint:active       { cursor: grabbing; }
+    .waypoint.selected     { background: #f39c12; box-shadow: 0 0 10px #f39c12; }
+    .waypoint.piece-node   { background: #e74c3c; border-color: #ff9999; }
+
+    #log {
+      background: #0d1520;
+      padding: 10px 16px;
+      font-size: 10px;
+      line-height: 1.8;
+      border-top: 2px solid #304269;
+      max-height: 120px;
+      overflow-y: auto;
+      color: #91BED4;
+    }
+    #log span { color: #F26101; }
+  </style>
+</head>
+<body>
+  <h2>🗺️ CALIBRAÇÃO DE CAMINHOS</h2>
+
+  <div class="toolbar">
+    <button class="btn-waypoint" onclick="setMode('waypoint')">➕ Waypoint</button>
+    <button class="btn-connect" id="btn-connect" onclick="setMode('connect')">🔗 Conectar</button>
+    <button class="btn-delete" onclick="setMode('delete')">🗑 Deletar</button>
+    <button class="btn-undo" onclick="undo()">↩ Desfazer</button>
+    <button class="btn-copy" onclick="copyOutput()">📋 Copiar</button>
+    <span class="mode-label" id="mode-label">Modo: ADICIONAR WAYPOINT</span>
+  </div>
+
+  <div class="map-wrapper" id="wrapper">
+    <img src="ChatGPT Image 28 de set. de 2026, 08_38_57.png" id="mapImg" alt="mapa" draggable="false" />
+    <svg class="overlay" id="svgOverlay"></svg>
+  </div>
+
+  <div id="log">Aguardando imagem...</div>
+
+  <script>
+    const PIECES_POS = [
+      { id: 'cpu',         name: 'CPU',        x: 26.6, y: 71.5 },
+      { id: 'ram',         name: 'RAM',        x: 48.9, y: 78   },
+      { id: 'ssd',         name: 'SSD',        x: 77.7, y: 77.8 },
+      { id: 'gpu',         name: 'GPU',        x: 80.7, y: 53.9 },
+      { id: 'motherboard', name: 'Placa-mae',  x: 49.3, y: 43.7 },
+      { id: 'keyboard',    name: 'Teclado',    x: 85.9, y: 30.2 },
+      { id: 'mouse',       name: 'Mouse',      x: 60.4, y: 17.6 },
+      { id: 'monitor',     name: 'Monitor',    x: 35.2, y: 17.2 },
+      { id: 'printer',     name: 'Impressora', x: 12.5, y: 24.3 },
+      { id: 'headset',     name: 'Headset',    x: 13.5, y: 46.8 },
+      { id: 'pendrive',    name: 'Pendrive',   x: 90.8, y: 56.3 },
+    ]
+
+    let mode = 'waypoint'
+    let waypoints = []
+    let connections = []
+    let connectFirst = null
+    let nextId = 0
+    let history = []
+    let wasDragged = false
+
+    const wrapper = document.getElementById('wrapper')
+    const img     = document.getElementById('mapImg')
+    const svg     = document.getElementById('svgOverlay')
+
+    function imgRect() { return img.getBoundingClientRect() }
+    function wrapRect() { return wrapper.getBoundingClientRect() }
+
+    function toAbs(xPct, yPct) {
+      const ir = imgRect(), wr = wrapRect()
+      return {
+        x: (ir.left - wr.left) + (xPct / 100) * ir.width,
+        y: (ir.top  - wr.top)  + (yPct / 100) * ir.height,
+      }
+    }
+
+    function toPct(xAbs, yAbs) {
+      const ir = imgRect(), wr = wrapRect()
+      return {
+        x: +((xAbs - (ir.left - wr.left)) / ir.width  * 100).toFixed(1),
+        y: +((yAbs - (ir.top  - wr.top))  / ir.height * 100).toFixed(1),
+      }
+    }
+
+    function log(msg) {
+      const el = document.getElementById('log')
+      el.innerHTML = '<span>▶</span> ' + msg + '<br>' + el.innerHTML
+    }
+
+    function setMode(m) {
+      mode = m
+      connectFirst = null
+      document.querySelectorAll('.waypoint').forEach(d => d.classList.remove('selected'))
+      document.getElementById('btn-connect').classList.toggle('active', m === 'connect')
+      const labels = {
+        waypoint: 'ADICIONAR WAYPOINT',
+        connect:  'CONECTAR (clique em 2 pontos)',
+        delete:   'DELETAR',
+      }
+      document.getElementById('mode-label').textContent = 'Modo: ' + labels[m]
+    }
+
+    function saveHistory() {
+      history.push({
+        waypoints:   JSON.parse(JSON.stringify(waypoints)),
+        connections: JSON.parse(JSON.stringify(connections)),
+        nextId,
+      })
+    }
+
+    function undo() {
+      if (!history.length) return
+      const prev = history.pop()
+      waypoints   = prev.waypoints
+      connections = prev.connections
+      nextId      = prev.nextId
+      redraw()
+    }
+
+    function init() {
+      PIECES_POS.forEach(p => {
+        waypoints.push({ id: nextId++, x: p.x, y: p.y, pieceId: p.id, name: p.name })
+      })
+      redraw()
+      log('Pontos das peças adicionados (vermelho). Adicione waypoints de caminho (azul) e conecte-os.')
+    }
+
+    // clique no mapa para adicionar waypoint
+    wrapper.addEventListener('click', e => {
+      if (wasDragged) return
+      if (mode !== 'waypoint') return
+      if (e.target.classList.contains('waypoint')) return
+
+      const wr = wrapRect()
+      const ir = imgRect()
+      const xAbs = e.clientX - wr.left
+      const yAbs = e.clientY - wr.top
+
+      if (xAbs < ir.left - wr.left || xAbs > ir.right  - wr.left) return
+      if (yAbs < ir.top  - wr.top  || yAbs > ir.bottom - wr.top)  return
+
+      saveHistory()
+      const pct = toPct(xAbs, yAbs)
+      waypoints.push({ id: nextId++, x: pct.x, y: pct.y })
+      redraw()
+      log('Waypoint ' + (nextId - 1) + ' adicionado em x:' + pct.x + '% y:' + pct.y + '%')
+    })
+
+    function onWaypointClick(e, wp) {
+      e.stopPropagation()
+      if (wasDragged) return
+
+      if (mode === 'delete') {
+        saveHistory()
+        waypoints   = waypoints.filter(w => w.id !== wp.id)
+        connections = connections.filter(([a, b]) => a !== wp.id && b !== wp.id)
+        redraw()
+        log('Waypoint ' + wp.id + ' deletado')
+        return
+      }
+
+      if (mode === 'connect') {
+        if (!connectFirst) {
+          connectFirst = wp.id
+          document.querySelectorAll('.waypoint').forEach(d => {
+            if (+d.dataset.id === wp.id) d.classList.add('selected')
+          })
+          log('Primeiro ponto: ' + wp.id + ' (' + (wp.name || 'waypoint') + '). Clique no segundo.')
+        } else {
+          if (connectFirst === wp.id) { connectFirst = null; return }
+          const exists = connections.some(([a, b]) =>
+            (a === connectFirst && b === wp.id) || (a === wp.id && b === connectFirst)
+          )
+          if (!exists) {
+            saveHistory()
+            connections.push([connectFirst, wp.id])
+            log('Conexao: ' + connectFirst + ' <-> ' + wp.id)
+          }
+          connectFirst = null
+          document.querySelectorAll('.waypoint').forEach(d => d.classList.remove('selected'))
+          redraw()
+        }
+      }
+    }
+
+    function makeDraggable(dot, wp) {
+      dot.addEventListener('mousedown', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        wasDragged = false
+
+        const startX    = e.clientX
+        const startY    = e.clientY
+        const startLeft = parseFloat(dot.style.left)
+        const startTop  = parseFloat(dot.style.top)
+
+        function onMove(e) {
+          const dx = e.clientX - startX
+          const dy = e.clientY - startY
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) wasDragged = true
+          const newLeft = startLeft + dx
+          const newTop  = startTop  + dy
+          dot.style.left = newLeft + 'px'
+          dot.style.top  = newTop  + 'px'
+          const pct = toPct(newLeft, newTop)
+          wp.x = pct.x
+          wp.y = pct.y
+          redrawLines()
+        }
+
+        function onUp() {
+          document.removeEventListener('mousemove', onMove)
+          document.removeEventListener('mouseup',   onUp)
+          if (wasDragged) log('Waypoint ' + wp.id + ' -> x:' + wp.x + '% y:' + wp.y + '%')
+        }
+
+        document.addEventListener('mousemove', onMove)
+        document.addEventListener('mouseup',   onUp)
+      })
+    }
+
+    function redrawLines() {
+      svg.innerHTML = ''
+      const ir = imgRect(), wr = wrapRect()
+      const ox = ir.left - wr.left
+      const oy = ir.top  - wr.top
+      connections.forEach(([aId, bId]) => {
+        const a = waypoints.find(w => w.id === aId)
+        const b = waypoints.find(w => w.id === bId)
+        if (!a || !b) return
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+        line.setAttribute('x1', ox + (a.x / 100) * ir.width)
+        line.setAttribute('y1', oy + (a.y / 100) * ir.height)
+        line.setAttribute('x2', ox + (b.x / 100) * ir.width)
+        line.setAttribute('y2', oy + (b.y / 100) * ir.height)
+        line.setAttribute('stroke', 'rgba(255,200,0,0.8)')
+        line.setAttribute('stroke-width', '2')
+        line.setAttribute('stroke-dasharray', '6,3')
+        svg.appendChild(line)
+      })
+    }
+
+    function redraw() {
+      wrapper.querySelectorAll('.waypoint').forEach(d => d.remove())
+      redrawLines()
+      waypoints.forEach(wp => {
+        const abs = toAbs(wp.x, wp.y)
+        const dot = document.createElement('div')
+        dot.className  = 'waypoint' + (wp.pieceId ? ' piece-node' : '')
+        dot.dataset.id = wp.id
+        dot.style.left = abs.x + 'px'
+        dot.style.top  = abs.y + 'px'
+        dot.textContent = wp.pieceId ? wp.name.slice(0, 3).toUpperCase() : wp.id
+        dot.title = wp.name || ('waypoint ' + wp.id)
+        dot.addEventListener('click', e => onWaypointClick(e, wp))
+        makeDraggable(dot, wp)
+        wrapper.appendChild(dot)
+      })
+    }
+
+    function copyOutput() {
+      const wps  = waypoints.map(w =>
+        '  { id: ' + w.id + ', x: ' + w.x + ', y: ' + w.y + (w.pieceId ? ", pieceId: '" + w.pieceId + "'" : '') + ' },'
+      ).join('\n')
+      const cons = connections.map(([a, b]) => '  [' + a + ', ' + b + '],').join('\n')
+      const out  = '// waypoints\nconst WAYPOINTS = [\n' + wps + '\n]\n\n// conexoes\nconst CONNECTIONS = [\n' + cons + '\n]'
+      navigator.clipboard.writeText(out).then(() => log('Copiado!'))
+    }
+
+    window.addEventListener('resize', redraw)
+    img.addEventListener('load', init)
+    if (img.complete) init()
+  </script>
+</body>
+</html>
