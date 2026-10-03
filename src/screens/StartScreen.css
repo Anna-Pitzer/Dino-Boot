@@ -241,6 +241,23 @@
   box-shadow: 0 2px 0 #6b2400;
 }
 
+.arcade-button.danger {
+  background: linear-gradient(180deg, #7a1a1a 0%, #4a0d0d 100%);
+  border-color: #e74c3c;
+  color: #ff8080;
+  box-shadow: 0 4px 0 #2a0505, 0 0 12px rgba(231,76,60,0.2);
+}
+.arcade-button.danger:hover {
+  background: linear-gradient(180deg, #a02020 0%, #6a1010 100%);
+  color: #ffaaaa;
+  box-shadow: 0 4px 0 #2a0505, 0 0 20px rgba(231,76,60,0.4);
+  transform: translateY(-1px);
+}
+.arcade-button.danger:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #2a0505;
+}
+
 /* ── Bottom panel ── */
 .arcade-panel {
   border-top: 1px solid rgba(145,190,212,0.1);

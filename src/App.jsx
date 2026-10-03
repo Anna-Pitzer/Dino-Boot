@@ -1,18 +1,40 @@
+import { useEffect } from 'react'
 import { GameProvider } from './context/GameContext'
 import { useGame } from './hooks/useGame'
-import StartScreen from './screens/StartScreen'
-import MapScreen from './screens/MapScreen'
+import StartScreen  from './screens/StartScreen'
+import MapScreen    from './screens/MapScreen'
+import PuzzleShell  from './components/PuzzleShell'
+import ShopScreen   from './screens/ShopScreen'
+import PuzzleBoot   from './puzzles/PuzzleBoot'
+import VictoryScreen from './screens/VictoryScreen'
 import './App.css'
 
-function GameRouter() {
-  const { currentScreen } = useGame()
+function BootWrapper() {
+  const { completeGame, resetGame } = useGame()
+  return <PuzzleBoot onSuccess={() => completeGame()} onFail={resetGame} />
+}
 
-  if (currentScreen === 'start') return <StartScreen />
-  if (currentScreen === 'map') return <MapScreen />
-  if (currentScreen === 'puzzle') return <div className="screen-placeholder">🧩 PuzzleShell — SPEC-03</div>
-  if (currentScreen === 'shop')   return <div className="screen-placeholder">🪙 ShopScreen — SPEC-18</div>
-  if (currentScreen === 'boot')   return <div className="screen-placeholder">💻 PuzzleBoot — SPEC-15</div>
-  if (currentScreen === 'victory') return <div className="screen-placeholder">🏆 VictoryScreen — SPEC-16</div>
+function GameRouter() {
+  const { currentScreen, setCurrentScreen } = useGame()
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handlePopState = () => {
+      const nextScreen = window.history.state?.screen ?? 'start'
+      setCurrentScreen(nextScreen)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [setCurrentScreen])
+
+  if (currentScreen === 'start')   return <StartScreen />
+  if (currentScreen === 'map')     return <MapScreen />
+  if (currentScreen === 'puzzle')  return <PuzzleShell />
+  if (currentScreen === 'shop')    return <ShopScreen />
+  if (currentScreen === 'boot')    return <BootWrapper />
+  if (currentScreen === 'victory') return <VictoryScreen />
   return null
 }
 

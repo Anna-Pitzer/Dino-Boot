@@ -1,0 +1,308 @@
+.ssd-puzzle {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 760px;
+  font-family: var(--game-font);
+}
+
+/* ── Help ── */
+.ssd-help-bar { display: flex; justify-content: flex-end; }
+
+.ssd-help-toggle {
+  font-family: var(--game-font);
+  font-size: 7px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid rgba(145,190,212,0.25);
+  border-radius: 4px;
+  color: rgba(145,190,212,0.5);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.ssd-help-toggle:hover { border-color: #91BED4; color: #91BED4; }
+
+.ssd-help-panel {
+  background: rgba(6,14,26,0.95);
+  border: 1px solid rgba(145,190,212,0.15);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ssd-help-tabs { display: flex; border-bottom: 1px solid rgba(145,190,212,0.1); }
+
+.ssd-help-tab {
+  flex: 1;
+  font-family: var(--game-font);
+  font-size: 7px;
+  letter-spacing: 1px;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: rgba(145,190,212,0.4);
+  cursor: pointer;
+  transition: all 0.1s;
+  border-bottom: 2px solid transparent;
+}
+.ssd-help-tab:hover { color: #91BED4; }
+.ssd-help-tab.active { color: var(--game-accent); border-bottom-color: var(--game-accent); }
+
+.ssd-help-content {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ssd-help-content p { font-size: 7px; color: rgba(145,190,212,0.7); letter-spacing: 0.5px; line-height: 1.8; margin: 0; }
+.ssd-help-content strong { color: var(--game-accent); }
+
+/* ── Phase label ── */
+.ssd-phase-label {
+  font-size: 8px;
+  color: var(--game-accent);
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(242,97,1,0.4);
+}
+
+.ssd-phase-hint {
+  font-size: 7px;
+  color: rgba(145,190,212,0.6);
+  letter-spacing: 1px;
+  margin: 0;
+  line-height: 1.8;
+}
+.ssd-phase-hint strong { color: #91BED4; }
+
+/* ── Section label ── */
+.ssd-section-label {
+  font-size: 7px;
+  color: rgba(145,190,212,0.4);
+  letter-spacing: 3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ssd-count { font-size: 8px; color: var(--game-accent); }
+
+/* ── Answer peek ── */
+.ssd-answer-bar { display: flex; align-items: center; gap: 12px; }
+
+.ssd-peek-btn {
+  font-family: var(--game-font);
+  font-size: 7px;
+  letter-spacing: 1px;
+  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid rgba(245,197,24,0.3);
+  border-radius: 4px;
+  color: rgba(245,197,24,0.6);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.ssd-peek-btn:hover { border-color: #f5c518; color: #f5c518; }
+.ssd-peeked-warn { font-size: 6px; color: rgba(244,67,54,0.7); letter-spacing: 1px; }
+
+.ssd-answer {
+  background: rgba(6,14,26,0.9);
+  border: 1px solid rgba(245,197,24,0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ssd-answer-row { display: flex; align-items: center; gap: 10px; font-size: 7px; }
+.ssd-answer-file   { color: rgba(145,190,212,0.7); min-width: 140px; }
+.ssd-answer-arrow  { color: rgba(255,255,255,0.2); }
+.ssd-answer-folder { color: #f5c518; }
+
+/* ── Folders ── */
+.ssd-folders {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.ssd-folder {
+  min-height: 80px;
+  background: rgba(6,14,26,0.8);
+  border: 2px dashed rgba(145,190,212,0.15);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ssd-folder:hover {
+  border-color: rgba(242,97,1,0.35);
+  box-shadow: 0 0 10px rgba(242,97,1,0.1);
+}
+
+.ssd-folder.has-files {
+  border-style: solid;
+  border-color: rgba(145,190,212,0.25);
+}
+
+.ssd-folder.reject {
+  border-color: var(--game-error) !important;
+  box-shadow: 0 0 14px rgba(244,67,54,0.4) !important;
+  animation: ssdShake 0.3s ease;
+}
+
+.ssd-folder-name {
+  font-size: 7px;
+  color: rgba(145,190,212,0.6);
+  letter-spacing: 1px;
+}
+
+.ssd-folder-files {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ssd-folder-file {
+  font-family: var(--game-font);
+  font-size: 6px;
+  color: #91BED4;
+  background: rgba(145,190,212,0.08);
+  border: 1px solid rgba(145,190,212,0.15);
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  text-align: left;
+  letter-spacing: 0.5px;
+  transition: background 0.1s;
+}
+.ssd-folder-file:hover { background: rgba(145,190,212,0.15); }
+
+/* ── Files ── */
+.ssd-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 56px;
+  background: rgba(6,14,26,0.8);
+  border: 2px dashed rgba(145,190,212,0.1);
+  border-radius: 10px;
+  padding: 12px;
+  align-items: center;
+}
+
+.ssd-file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: rgba(242,97,1,0.08);
+  border: 2px solid rgba(242,97,1,0.3);
+  border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+}
+.ssd-file:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,0.4); }
+.ssd-file:active { transform: translateY(1px); cursor: grabbing; }
+
+.ssd-file-icon { font-size: 14px; line-height: 1; }
+.ssd-file-name { font-size: 7px; color: #F26101; letter-spacing: 0.5px; }
+
+.ssd-empty { font-size: 7px; color: rgba(145,190,212,0.2); letter-spacing: 1px; }
+
+/* ── Actions ── */
+.ssd-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
+.ssd-btn {
+  padding: 12px 20px;
+  font-family: var(--game-font);
+  font-size: 9px;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.1s;
+  border: 2px solid;
+}
+
+.ssd-btn.reset {
+  background: transparent;
+  border-color: rgba(145,190,212,0.3);
+  color: rgba(145,190,212,0.6);
+}
+.ssd-btn.reset:hover { border-color: #91BED4; color: #91BED4; }
+
+.ssd-btn.confirm {
+  background: linear-gradient(180deg, #e85a00, #b84000);
+  border-color: #F26101;
+  color: #fff;
+  box-shadow: 0 4px 0 #6b2400;
+}
+.ssd-btn.confirm:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ff6a10, #d45000);
+  box-shadow: 0 4px 0 #6b2400, 0 0 16px rgba(242,97,1,0.4);
+}
+.ssd-btn.confirm:active:not(:disabled) { transform: translateY(3px); box-shadow: none; }
+.ssd-btn.confirm:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+
+/* ── Tree ── */
+.ssd-tree {
+  background: rgba(6,14,26,0.9);
+  border: 2px solid rgba(145,190,212,0.1);
+  border-radius: 10px;
+  padding: 12px 0;
+  font-size: 0;
+}
+
+.ssd-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 16px;
+  transition: background 0.1s;
+}
+
+.ssd-tree-node.clickable {
+  cursor: pointer;
+}
+.ssd-tree-node.clickable:hover {
+  background: rgba(242,97,1,0.08);
+}
+
+.ssd-tree-node.wrong {
+  background: rgba(244,67,54,0.15) !important;
+  animation: ssdShake 0.3s ease;
+}
+
+.ssd-tree-icon { font-size: 13px; line-height: 1; flex-shrink: 0; }
+
+.ssd-tree-label {
+  font-family: var(--game-font);
+  font-size: 8px;
+  color: rgba(145,190,212,0.7);
+  letter-spacing: 0.5px;
+}
+
+.ssd-tree-node.clickable .ssd-tree-label {
+  color: #91BED4;
+}
+
+.ssd-tree-path {
+  font-family: var(--game-font);
+  font-size: 6px;
+  color: rgba(145,190,212,0.3);
+  margin-left: 6px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Keyframes ── */
+@keyframes ssdShake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-5px); }
+  75%       { transform: translateX(5px); }
+}

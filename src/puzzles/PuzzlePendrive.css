@@ -1,0 +1,154 @@
+.pd-puzzle {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #e0e8f0;
+  font-family: var(--game-font, 'Press Start 2P'), monospace;
+  font-size: 10px;
+}
+
+/* ── Help ── */
+.pd-help-bar { display: flex; justify-content: flex-end; }
+.pd-help-toggle {
+  background: #1a2540; border: 1px solid #304269;
+  color: #91BED4; font-family: inherit; font-size: 9px;
+  padding: 4px 10px; cursor: pointer; border-radius: 4px;
+}
+.pd-help-toggle:hover { border-color: #F26101; color: #F26101; }
+.pd-help-panel {
+  background: #0d1a2e; border: 1px solid #304269;
+  border-radius: 6px; padding: 10px;
+}
+.pd-help-tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+.pd-help-tab {
+  background: #1a2540; border: 1px solid #304269;
+  color: #91BED4; font-family: inherit; font-size: 8px;
+  padding: 4px 8px; cursor: pointer; border-radius: 3px;
+}
+.pd-help-tab.active { background: #F26101; border-color: #F26101; color: #fff; }
+.pd-help-content { font-size: 8px; line-height: 1.8; color: #b0c4d8; }
+.pd-help-content p { margin: 4px 0; }
+.pd-help-content strong { color: #F26101; }
+.pd-help-content code { color: #f5c518; }
+
+/* ── Answer ── */
+.pd-answer-bar { display: flex; align-items: center; gap: 10px; }
+.pd-peek-btn {
+  background: #1a2540; border: 1px solid #304269;
+  color: #91BED4; font-family: inherit; font-size: 8px;
+  padding: 4px 10px; cursor: pointer; border-radius: 4px;
+}
+.pd-peek-btn:hover { border-color: #f5c518; color: #f5c518; }
+.pd-peeked-warn { font-size: 8px; color: #e74c3c; }
+.pd-answer {
+  display: flex; flex-direction: column; gap: 4px;
+  background: #0d1a2e; border: 1px solid #304269;
+  border-radius: 6px; padding: 8px;
+}
+.pd-answer-row { font-size: 8px; color: #f5c518; }
+
+/* ── Phases ── */
+.pd-phases {
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid #304269; padding-bottom: 8px;
+}
+.pd-phase-dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; border: 2px solid #304269;
+  background: #1a2540; color: #91BED4; flex-shrink: 0;
+}
+.pd-phase-dot.active { border-color: #F26101; color: #F26101; background: #2a1a00; }
+.pd-phase-dot.done   { border-color: #27ae60; color: #2ecc71; background: #0d2a1a; }
+.pd-phase-label { font-size: 8px; color: #F26101; letter-spacing: 1px; }
+
+/* ── Fase 1 — Device list ── */
+.pd-device-list {
+  background: #050d18; border: 2px solid #304269;
+  border-radius: 6px; overflow: hidden;
+}
+.pd-list-header {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+  background: #1a2540; padding: 8px 12px;
+  font-size: 8px; color: #91BED4;
+  border-bottom: 1px solid #304269;
+}
+.pd-device-row {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 10px 12px; cursor: pointer;
+  border-bottom: 1px solid #0d1a2e;
+  transition: background 0.15s; font-size: 9px;
+}
+.pd-device-row:last-child { border-bottom: none; }
+.pd-device-row:hover { background: #1a2540; }
+.pd-device-row.wrong { background: #2a0d0d; animation: pd-shake 0.3s; }
+.pd-dev-icon { margin-right: 6px; }
+.pd-dev-label { color: #f5c518; display: flex; align-items: center; }
+.pd-dev-type  { color: #91BED4; }
+.pd-dev-size  { color: #e0e8f0; }
+.pd-dev-status { color: #e74c3c; }
+
+/* ── Fase 2 — Mount ── */
+.pd-mount-area {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  padding: 16px 0;
+}
+.pd-mount-card {
+  display: flex; align-items: center; gap: 16px;
+  background: #0d1a2e; border: 2px solid #304269;
+  border-radius: 8px; padding: 16px 20px; width: 100%;
+}
+.pd-mount-icon { font-size: 36px; flex-shrink: 0; }
+.pd-mount-name   { font-size: 11px; color: #f5c518; margin-bottom: 6px; }
+.pd-mount-detail { font-size: 8px; color: #91BED4; margin-bottom: 6px; }
+.pd-mount-point  { font-size: 8px; color: #b0c4d8; }
+.pd-mount-point strong { color: #2ecc71; }
+
+.pd-mount-btn {
+  font-family: inherit; font-size: 10px;
+  background: #F26101; border: 2px solid #F26101;
+  color: #fff; padding: 12px 24px; border-radius: 4px;
+  cursor: pointer; transition: all 0.2s;
+}
+.pd-mount-btn:hover:not(:disabled) { background: #d4540a; }
+.pd-mount-btn.mounted { background: #27ae60; border-color: #27ae60; cursor: not-allowed; }
+.pd-mount-btn:disabled { opacity: 0.7; }
+
+/* ── Fase 3 — File tree ── */
+.pd-nav-area {
+  background: #050d18; border: 2px solid #304269;
+  border-radius: 6px; overflow: hidden;
+}
+.pd-nav-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #1a2540; padding: 8px 12px;
+  border-bottom: 1px solid #304269;
+}
+.pd-nav-path  { font-size: 9px; color: #f5c518; }
+.pd-nav-hint  { font-size: 8px; color: #91BED4; }
+.pd-nav-hint strong { color: #F26101; }
+
+.pd-tree { padding: 8px 4px; }
+
+.pd-tree-node { user-select: none; }
+.pd-tree-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 8px; border-radius: 4px;
+  cursor: pointer; transition: background 0.1s; font-size: 9px;
+}
+.pd-tree-row:hover { background: #1a2540; }
+.pd-tree-row.dir  { color: #91BED4; }
+.pd-tree-row.file { color: #e0e8f0; }
+.pd-tree-arrow { width: 10px; flex-shrink: 0; color: #304269; font-size: 10px; }
+.pd-tree-icon  { font-size: 12px; flex-shrink: 0; }
+.pd-tree-name  { flex: 1; }
+
+.pd-tree-node.target-file .pd-tree-row { color: #f5c518; }
+.pd-tree-node.target-file .pd-tree-row:hover { background: #2a2000; }
+.pd-tree-node.wrong .pd-tree-row { color: #e74c3c; animation: pd-shake 0.3s; }
+
+@keyframes pd-shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-4px); }
+  75%       { transform: translateX(4px); }
+}

@@ -1,0 +1,175 @@
+.shop-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #0d1220;
+  font-family: var(--game-font, 'Press Start 2P'), monospace;
+  color: #e0e8f0;
+  padding: 16px;
+  gap: 12px;
+}
+
+/* ── Header ── */
+.shop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1a2540;
+  border: 2px solid #304269;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+.shop-title { font-size: 12px; color: #F26101; }
+.shop-coins { font-size: 11px; color: #f5c518; }
+
+/* ── Body ── */
+.shop-body {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  align-items: flex-start;
+}
+
+/* ── Preview ── */
+.shop-preview {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.shop-preview-label {
+  font-size: 8px;
+  color: #91BED4;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.shop-desk {
+  background: #0d1a2e;
+  border: 2px solid #304269;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 200px;
+}
+.shop-desk-top {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  min-height: 32px;
+}
+.shop-desk-lamp, .shop-desk-deco { font-size: 24px; }
+
+.shop-desk-main {
+  display: flex;
+  justify-content: center;
+}
+.shop-desk-case {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 36px;
+}
+.shop-desk-case span { font-size: 7px; color: #91BED4; }
+
+.shop-desk-bottom { display: flex; justify-content: center; }
+.shop-desk-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 20px;
+}
+.shop-desk-pad span { font-size: 7px; color: #91BED4; }
+
+.shop-confirm-btn {
+  font-family: inherit;
+  font-size: 8px;
+  background: #F26101;
+  border: 2px solid #F26101;
+  color: #fff;
+  padding: 12px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 0 #7a2e00;
+  line-height: 1.6;
+}
+.shop-confirm-btn:hover { background: #d4540a; transform: translateY(-1px); }
+.shop-confirm-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #7a2e00; }
+
+/* ── Catalog ── */
+.shop-catalog {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shop-tabs {
+  display: flex;
+  gap: 6px;
+}
+.shop-tab {
+  background: #1a2540;
+  border: 1px solid #304269;
+  color: #91BED4;
+  font-family: inherit;
+  font-size: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.1s;
+}
+.shop-tab:hover { border-color: #91BED4; }
+.shop-tab.active { background: #F26101; border-color: #F26101; color: #fff; }
+
+.shop-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a2540;
+  border: 2px solid #304269;
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.shop-item:hover { border-color: #91BED4; }
+.shop-item.previewing { border-color: #F26101; background: #2a1a00; }
+.shop-item.owned { border-color: #27ae60; background: #0d2a1a; }
+.shop-item.unaffordable { opacity: 0.5; cursor: not-allowed; }
+
+.shop-item-icon { font-size: 24px; flex-shrink: 0; }
+.shop-item-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.shop-item-name { font-size: 9px; color: #e0e8f0; }
+.shop-item-desc { font-size: 7px; color: #91BED4; }
+
+.shop-item-right { flex-shrink: 0; }
+
+.shop-badge.owned { font-size: 7px; color: #2ecc71; }
+
+.shop-buy-btn {
+  font-family: inherit;
+  font-size: 8px;
+  background: #F26101;
+  border: 1px solid #F26101;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.shop-buy-btn:hover { background: #d4540a; }
+.shop-buy-btn.free { background: #27ae60; border-color: #27ae60; }
+.shop-buy-btn.free:hover { background: #1e8449; }
+.shop-buy-btn.disabled { background: #304269; border-color: #304269; color: #91BED4; cursor: not-allowed; opacity: 0.6; }

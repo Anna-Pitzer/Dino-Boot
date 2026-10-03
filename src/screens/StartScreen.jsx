@@ -1,8 +1,10 @@
 import { useGame } from '../hooks/useGame'
+import { hasSave } from '../context/GameContext'
 import './StartScreen.css'
 
 export default function StartScreen() {
-  const { score, startGame } = useGame()
+  const { score, startGame, resetGame } = useGame()
+  const saveExists = hasSave()
 
   return (
     <div className="start-screen">
@@ -34,9 +36,20 @@ export default function StartScreen() {
         </div>
 
         <div className="button-group">
-          <button className="arcade-button primary" onClick={startGame}>
-            ▶ JOGAR
-          </button>
+          {saveExists ? (
+            <button className="arcade-button primary" onClick={startGame}>
+              ▶ CONTINUAR
+            </button>
+          ) : (
+            <button className="arcade-button primary" onClick={startGame}>
+              ▶ NOVO JOGO
+            </button>
+          )}
+          {saveExists && (
+            <button className="arcade-button danger" onClick={() => { if (confirm('Apagar progresso salvo?')) resetGame() }}>
+              ✕ RESETAR
+            </button>
+          )}
           <button className="arcade-button" onClick={() => alert('📊 COMO JOGAR\n\n• Explore o mapa\n• Clique nas peças para resolver puzzles\n• Colete todas as 11 peças\n• Inicialize o computador!')}>
             ⓘ COMO JOGAR
           </button>

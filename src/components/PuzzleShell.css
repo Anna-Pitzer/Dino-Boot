@@ -1,0 +1,354 @@
+/* ── PuzzleShell ── */
+.puzzle-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(242,97,1,0.15), transparent 25%),
+    radial-gradient(circle at bottom, rgba(145,190,212,0.12), transparent 25%),
+    #0a1220;
+  font-family: var(--game-font);
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.puzzle-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.12) 3px,
+    rgba(0,0,0,0.12) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+.puzzle-shell.success { background: linear-gradient(180deg, rgba(10,25,18,1), rgba(7,17,12,1)); }
+.puzzle-shell.error { background: linear-gradient(180deg, rgba(26,10,10,1), rgba(17,7,7,1)); }
+
+.puzzle-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: linear-gradient(180deg, rgba(6,14,26,0.98), rgba(13,18,32,0.9));
+  border-bottom: 2px solid rgba(242,97,1,0.85);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.28), 0 0 14px rgba(242,97,1,0.12);
+  padding: 0;
+  position: relative;
+  z-index: 10;
+  flex-wrap: wrap;
+}
+
+.puzzle-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #F26101, #91BED4, #F26101);
+}
+
+.puzzle-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-right: 1px solid rgba(145,190,212,0.08);
+  flex: 1;
+  min-width: 220px;
+}
+
+.puzzle-piece-img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(242,97,1,0.55));
+}
+
+.puzzle-piece-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.puzzle-piece-name {
+  font-size: 11px;
+  color: var(--game-accent);
+  letter-spacing: 2px;
+  text-shadow: 0 0 12px rgba(242,97,1,0.45);
+}
+
+.puzzle-piece-concept {
+  font-size: 7px;
+  color: rgba(145,190,212,0.75);
+  letter-spacing: 1px;
+}
+
+.puzzle-header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 28px;
+  border-right: 1px solid rgba(145,190,212,0.08);
+  min-width: 120px;
+}
+
+.puzzle-timer-label {
+  font-size: 6px;
+  color: rgba(145,190,212,0.6);
+  letter-spacing: 2px;
+}
+
+.timer-display {
+  font-size: 20px;
+  color: #91BED4;
+  text-shadow: 0 0 14px rgba(145,190,212,0.6);
+  letter-spacing: 3px;
+}
+
+.puzzle-header-right {
+  display: flex;
+  gap: 0;
+}
+
+.puzzle-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 20px;
+  border-right: 1px solid rgba(145,190,212,0.08);
+  min-width: 92px;
+}
+
+.puzzle-stat-label {
+  font-size: 6px;
+  color: rgba(145,190,212,0.6);
+  letter-spacing: 2px;
+}
+
+.puzzle-stat-value {
+  font-size: 13px;
+  color: var(--game-accent);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.puzzle-stat-value.coins {
+  color: #f5c518;
+  text-shadow: 0 0 8px rgba(245,197,24,0.5);
+}
+
+.ph-life { font-size: 13px; }
+.ph-life.active { color: #f44336; filter: drop-shadow(0 0 5px rgba(244,67,54,0.7)); }
+.ph-life.lost { color: rgba(255,255,255,0.12); }
+
+.puzzle-feedback {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+  animation: feedbackIn 0.2s ease;
+}
+
+.puzzle-feedback span {
+  font-size: 22px;
+  letter-spacing: 4px;
+  padding: 20px 40px;
+  border-radius: 12px;
+  border: 3px solid;
+  backdrop-filter: blur(2px);
+}
+
+.puzzle-feedback.success span {
+  color: var(--game-success);
+  border-color: var(--game-success);
+  background: rgba(76,175,80,0.12);
+  text-shadow: 0 0 20px rgba(76,175,80,0.8);
+  box-shadow: 0 0 40px rgba(76,175,80,0.3);
+}
+
+.puzzle-feedback.error span {
+  color: var(--game-error);
+  border-color: var(--game-error);
+  background: rgba(244,67,54,0.12);
+  text-shadow: 0 0 20px rgba(244,67,54,0.8);
+  box-shadow: 0 0 40px rgba(244,67,54,0.3);
+  animation: shake 0.4s ease;
+}
+
+.puzzle-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 24px 20px;
+}
+
+.puzzle-content > * {
+  width: min(1120px, 100%);
+  background: rgba(7, 15, 24, 0.78);
+  border: 1px solid rgba(145,190,212,0.14);
+  border-radius: 18px;
+  box-shadow: 0 16px 24px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.puzzle-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: rgba(6,14,26,0.9);
+  border: 2px solid rgba(145,190,212,0.15);
+  border-radius: 16px;
+  padding: 48px 56px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+}
+
+.puzzle-placeholder-img {
+  width: 82px;
+  height: 82px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px rgba(242,97,1,0.4));
+  animation: floatImg 3s ease-in-out infinite;
+}
+
+.puzzle-placeholder-name {
+  font-size: 16px;
+  color: var(--game-accent);
+  letter-spacing: 3px;
+  margin: 0;
+  text-shadow: 0 0 12px rgba(242,97,1,0.45);
+}
+
+.puzzle-placeholder-concept {
+  font-size: 8px;
+  color: rgba(145,190,212,0.7);
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.puzzle-placeholder-tag {
+  font-size: 7px;
+  color: rgba(145,190,212,0.45);
+  letter-spacing: 3px;
+  margin: 0;
+  border: 1px dashed rgba(145,190,212,0.2);
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.puzzle-placeholder-btns {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.puzzle-btn {
+  padding: 12px 20px;
+  font-family: var(--game-font);
+  font-size: 9px;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 2px solid;
+}
+
+.puzzle-btn.success-btn {
+  background: rgba(76,175,80,0.1);
+  border-color: var(--game-success);
+  color: var(--game-success);
+  box-shadow: 0 4px 0 #1a3a1a;
+}
+
+.puzzle-btn.success-btn:hover {
+  background: rgba(76,175,80,0.2);
+  box-shadow: 0 4px 0 #1a3a1a, 0 0 16px rgba(76,175,80,0.3);
+}
+
+.puzzle-btn.error-btn {
+  background: rgba(244,67,54,0.1);
+  border-color: var(--game-error);
+  color: var(--game-error);
+  box-shadow: 0 4px 0 #3a1a1a;
+}
+
+.puzzle-btn.error-btn:hover {
+  background: rgba(244,67,54,0.2);
+  box-shadow: 0 4px 0 #3a1a1a, 0 0 16px rgba(244,67,54,0.3);
+}
+
+.puzzle-btn:active { transform: translateY(3px); box-shadow: none !important; }
+
+.puzzle-footer {
+  padding: 16px 24px 18px;
+  background: linear-gradient(180deg, rgba(6,14,26,0.94), rgba(7,12,20,0.96));
+  border-top: 1px solid rgba(145,190,212,0.08);
+  display: flex;
+  justify-content: flex-start;
+}
+
+.puzzle-back-btn {
+  padding: 10px 16px;
+  font-family: var(--game-font);
+  font-size: 7px;
+  letter-spacing: 1px;
+  background: linear-gradient(180deg, rgba(145,190,212,0.06), rgba(145,190,212,0.02));
+  border: 1px solid rgba(145,190,212,0.25);
+  border-radius: 6px;
+  color: rgba(145,190,212,0.8);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.puzzle-back-btn:hover:not(:disabled) {
+  border-color: rgba(145,190,212,0.7);
+  color: #dfeef8;
+  background: rgba(145,190,212,0.08);
+  transform: translateY(-1px);
+}
+
+.puzzle-back-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+@keyframes feedbackIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+}
+
+@keyframes floatImg {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@media (max-width: 600px) {
+  .puzzle-header { flex-direction: column; align-items: flex-start; }
+  .puzzle-header-right { flex-wrap: wrap; }
+  .puzzle-piece-name { font-size: 9px; }
+  .timer-display { font-size: 16px; }
+  .puzzle-placeholder { padding: 32px 24px; }
+  .puzzle-placeholder-name { font-size: 13px; }
+  .puzzle-placeholder-btns { flex-direction: column; }
+}

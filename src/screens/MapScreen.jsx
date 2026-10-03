@@ -13,15 +13,16 @@ const START_PIECE = 'cpu'
 const delay = ms => new Promise(res => setTimeout(res, ms))
 
 export default function MapScreen() {
-  const { collectedPieces, damagedPieces, lives, outOfLives, score, coins, openPuzzle, resetGame } = useGame()
+  const { collectedPieces, damagedPieces, lives, outOfLives, score, coins, openPuzzle, resetGame, dinoState, saveDinoState } = useGame()
   const [tooltip, setTooltip] = useState(null)
   const [dinoPos, setDinoPos] = useState(() => {
-    const wp = WAYPOINTS.find(w => w.pieceId === START_PIECE)
+    if (dinoState.x !== null) return { x: dinoState.x, y: dinoState.y }
+    const wp = WAYPOINTS.find(w => w.pieceId === 'cpu')
     return { x: wp.x, y: wp.y }
   })
   const [moving, setMoving]   = useState(false)
-  const [flipX, setFlipX]     = useState(false)
-  const currentPiece = useRef(START_PIECE)
+  const [flipX, setFlipX]     = useState(dinoState.flipX)
+  const currentPiece = useRef(dinoState.pieceId)
 
   const collected = collectedPieces.length
   const total     = PIECES.length
@@ -45,6 +46,8 @@ export default function MapScreen() {
     }
 
     currentPiece.current = toPieceId
+    const finalWp = WAYPOINTS.find(w => w.pieceId === toPieceId)
+    saveDinoState({ pieceId: toPieceId, x: finalWp.x, y: finalWp.y, flipX })
     setMoving(false)
     openPuzzle(toPieceId)
   }

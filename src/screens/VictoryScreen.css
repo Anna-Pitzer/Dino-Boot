@@ -1,0 +1,161 @@
+.vs-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: var(--game-font, 'Press Start 2P'), monospace;
+}
+
+.vs-screen.victory {
+  background: #0d1220;
+  background-image: radial-gradient(ellipse 80% 60% at 50% 40%, #0d2a1a 0%, transparent 70%);
+}
+
+.vs-screen.failed {
+  background: #0d1220;
+  background-image: radial-gradient(ellipse 80% 60% at 50% 40%, #2a0d0d 0%, transparent 70%);
+}
+
+.vs-container {
+  max-width: 560px;
+  width: 100%;
+  background: #1a2540;
+  border: 3px solid #304269;
+  border-radius: 16px;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.vs-screen.victory .vs-container { border-color: #27ae60; box-shadow: 0 0 40px rgba(39,174,96,0.2); }
+.vs-screen.failed  .vs-container { border-color: #e74c3c; box-shadow: 0 0 40px rgba(231,76,60,0.2); }
+
+.vs-icon { font-size: 56px; animation: vs-bounce 1.5s ease-in-out infinite; }
+
+.vs-title {
+  font-size: 22px;
+  margin: 0;
+  color: #2ecc71;
+  text-shadow: 0 0 20px rgba(46,204,113,0.6);
+}
+.vs-title.error {
+  color: #e74c3c;
+  text-shadow: 0 0 20px rgba(231,76,60,0.6);
+}
+
+.vs-subtitle {
+  font-size: 8px;
+  color: #91BED4;
+  line-height: 1.8;
+  margin: 0;
+  max-width: 400px;
+}
+
+/* ── Damage list ── */
+.vs-damage-list {
+  width: 100%;
+  background: #0d1220;
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vs-section-label {
+  font-size: 8px;
+  color: #91BED4;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #304269;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  width: 100%;
+  text-align: left;
+}
+
+.vs-damage-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 9px;
+  color: #e74c3c;
+  text-align: left;
+}
+.vs-damage-icon { font-size: 12px; flex-shrink: 0; }
+
+/* ── Pieces grid ── */
+.vs-pieces { width: 100%; }
+
+.vs-pieces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.vs-piece {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: #0d1220;
+  border: 1px solid #304269;
+  border-radius: 6px;
+  padding: 8px 4px;
+  font-size: 6px;
+  color: #91BED4;
+}
+.vs-piece img { width: 36px; height: 36px; object-fit: contain; }
+.vs-piece.collected { border-color: #27ae60; }
+.vs-piece.collected img { filter: none; }
+.vs-piece.missing img { filter: grayscale(1) opacity(0.3); }
+.vs-piece.missing { color: #304269; }
+
+/* ── Stats ── */
+.vs-stats {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.vs-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #0d1220;
+  border: 1px solid #304269;
+  border-radius: 6px;
+  padding: 10px 16px;
+  flex: 1;
+}
+.vs-stat-label { font-size: 7px; color: #91BED4; }
+.vs-stat-value { font-size: 13px; color: #F26101; }
+.vs-stat-value.coins { color: #f5c518; }
+
+/* ── Button ── */
+.vs-btn {
+  font-family: inherit;
+  font-size: 10px;
+  background: #F26101;
+  border: 2px solid #F26101;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 0 #7a2e00;
+}
+.vs-btn:hover { background: #d4540a; transform: translateY(-1px); }
+.vs-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #7a2e00; }
+
+@keyframes vs-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}

@@ -2,6 +2,8 @@
 
 Stack: React 19 + Vite. Cada spec é uma unidade de trabalho independente.
 
+> Estado atual: todas as specs principais do ciclo de jogo já foram implementadas e integradas ao projeto.
+
 ---
 
 ## SPEC-01 — Estrutura base do jogo ✅
@@ -84,7 +86,7 @@ Stack: React 19 + Vite. Cada spec é uma unidade de trabalho independente.
 
 ---
 
-## SPEC-03 — Shell de puzzle
+## SPEC-03 — Shell de puzzle ✅
 
 **Objetivo:** criar o container genérico que envolve todos os puzzles.
 
@@ -104,7 +106,7 @@ Stack: React 19 + Vite. Cada spec é uma unidade de trabalho independente.
 
 ---
 
-## SPEC-04 — Puzzle 1: CPU (Escalonamento Round Robin)
+## SPEC-04 — Puzzle 1: CPU (Escalonamento Round Robin) ✅
 
 **Objetivo:** jogador monta a fila de processos com Round Robin.
 
@@ -123,7 +125,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-05 — Puzzle 2: RAM (Alocação de Memória)
+## SPEC-05 — Puzzle 2: RAM (Alocação de Memória) ✅
 
 **Objetivo:** jogador aloca programas nos blocos de memória.
 
@@ -140,7 +142,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-06 — Puzzle 3: SSD (Sistema de Arquivos)
+## SPEC-06 — Puzzle 3: SSD (Sistema de Arquivos) ✅
 
 **Objetivo:** jogador organiza arquivos em pastas e localiza um arquivo específico.
 
@@ -157,7 +159,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-07 — Puzzle 4: GPU (Driver)
+## SPEC-07 — Puzzle 4: GPU (Driver) ✅
 
 **Objetivo:** jogador identifica e instala o driver correto.
 
@@ -174,7 +176,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-08 — Puzzle 5: Placa-mãe (Conexão de Componentes)
+## SPEC-08 — Puzzle 5: Placa-mãe (Conexão de Componentes) ✅
 
 **Objetivo:** jogador conecta CPU, RAM, GPU e SSD nos encaixes corretos.
 
@@ -190,7 +192,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-09 — Puzzle 6: Teclado (Eventos de Entrada)
+## SPEC-09 — Puzzle 6: Teclado (Eventos de Entrada) ✅
 
 **Objetivo:** jogador conecta teclas a códigos ASCII e decifra uma sequência.
 
@@ -204,7 +206,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-10 — Puzzle 7: Mouse (Movimentação do Cursor)
+## SPEC-10 — Puzzle 7: Mouse (Movimentação do Cursor) ✅
 
 **Objetivo:** jogador executa sequência de movimentos para levar o cursor ao alvo.
 
@@ -221,7 +223,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-11 — Puzzle 8: Monitor (Configuração de Vídeo)
+## SPEC-11 — Puzzle 8: Monitor (Configuração de Vídeo) ✅
 
 **Objetivo:** jogador seleciona a configuração compatível com o monitor.
 
@@ -237,7 +239,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-12 — Puzzle 9: Impressora (Fila de Impressão)
+## SPEC-12 — Puzzle 9: Impressora (Fila de Impressão) ✅
 
 **Objetivo:** jogador organiza a fila de documentos por prioridade.
 
@@ -253,7 +255,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-13 — Puzzle 10: Headset (I/O de Áudio)
+## SPEC-13 — Puzzle 10: Headset (I/O de Áudio) ✅
 
 **Objetivo:** jogador conecta microfone à entrada e headset à saída.
 
@@ -269,7 +271,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-14 — Puzzle 11: Pendrive (Montagem)
+## SPEC-14 — Puzzle 11: Pendrive (Montagem) ✅
 
 **Objetivo:** jogador monta o pendrive e localiza o arquivo solicitado.
 
@@ -285,7 +287,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-15 — Puzzle Final: Boot do Sistema
+## SPEC-15 — Puzzle Final: Boot do Sistema ✅
 
 **Objetivo:** jogador ordena as 8 etapas de inicialização do computador.
 
@@ -314,7 +316,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-16 — Tela de Vitória / Falha de Boot
+## SPEC-16 — Tela de Vitória / Falha de Boot ✅
 
 **Objetivo:** exibir resultado final após o puzzle de boot.
 
@@ -329,7 +331,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-18 — Loja de Customização do Setup ✏️
+## SPEC-18 — Loja de Customização do Setup ✅
 
 **Objetivo:** após coletar todas as peças, o jogador gasta moedinhas para montar e personalizar o setup antes do boot final.
 
@@ -367,7 +369,7 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 
 ---
 
-## SPEC-17 — Sistema de Pontuação e Persistência
+## SPEC-17 — Sistema de Pontuação e Persistência ✅
 
 **Objetivo:** calcular e salvar pontuação entre sessões.
 
@@ -379,30 +381,32 @@ Calcular a ordem de execução Round Robin e comparar com a fila montada pelo jo
 - Função `resetGame()` limpa o `localStorage` e reseta o contexto
 
 ### Arquivos
-- `src/hooks/usePersistence.js`
-- Integrar em `GameContext.jsx`
+- `src/context/GameContext.jsx` — persistência local e reset do progresso
+- `src/hooks/useGame.js` — acesso aos dados globais do jogo
 
 ---
 
-## Ordem de implementação recomendada
+## Ordem de implementação recomendada (estado atual)
 
-| Prioridade | Spec | Motivo |
+| Prioridade original | Spec | Status |
 |---|---|---|
-| 1 | SPEC-01 ✅ | Base para tudo |
-| 2 | SPEC-02 ✅ | Mapa é a tela principal |
-| 3 | SPEC-03 | Shell reutilizado por todos os puzzles |
-| 4 | SPEC-09 | Puzzle mais simples (tutorial) |
-| 5 | SPEC-10 | Segundo mais simples |
-| 6 | SPEC-06 | SSD — visual claro |
-| 7 | SPEC-07 | GPU — lógica simples |
-| 8 | SPEC-05 | RAM — drag and drop |
-| 9 | SPEC-04 | CPU — lógica mais complexa |
-| 10 | SPEC-11 | Monitor |
-| 11 | SPEC-13 | Headset |
-| 12 | SPEC-14 | Pendrive |
-| 13 | SPEC-12 | Impressora |
-| 14 | SPEC-08 | Placa-mãe |
-| 15 | SPEC-18 | Loja — antes do boot final |
-| 16 | SPEC-15 | Puzzle final |
-| 17 | SPEC-16 | Tela de vitória |
-| 18 | SPEC-17 | Persistência |
+| 1 | SPEC-01 | ✅ Concluída |
+| 2 | SPEC-02 | ✅ Concluída |
+| 3 | SPEC-03 | ✅ Concluída |
+| 4 | SPEC-09 | ✅ Concluída |
+| 5 | SPEC-10 | ✅ Concluída |
+| 6 | SPEC-06 | ✅ Concluída |
+| 7 | SPEC-07 | ✅ Concluída |
+| 8 | SPEC-05 | ✅ Concluída |
+| 9 | SPEC-04 | ✅ Concluída |
+| 10 | SPEC-11 | ✅ Concluída |
+| 11 | SPEC-13 | ✅ Concluída |
+| 12 | SPEC-14 | ✅ Concluída |
+| 13 | SPEC-12 | ✅ Concluída |
+| 14 | SPEC-08 | ✅ Concluída |
+| 15 | SPEC-18 | ✅ Concluída |
+| 16 | SPEC-15 | ✅ Concluída |
+| 17 | SPEC-16 | ✅ Concluída |
+| 18 | SPEC-17 | ✅ Concluída |
+
+> O projeto já está em estado funcional com todos os módulos principais do ciclo principal do jogo concluídos.
