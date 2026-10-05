@@ -1,31 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useGame } from '../hooks/useGame'
+import { useGameAudio } from '../audio/useGameAudio'
+import { getDifficultyProfile } from '../data/difficulty'
 import './PuzzleGPU.css'
-
-const DEVICES = [
-  { id: 'cpu',     name: 'CPU',     status: 'ok',    icon: '🧠', version: null },
-  { id: 'ram',     name: 'RAM',     status: 'ok',    icon: '💾', version: null },
-  { id: 'gpu',     name: 'GPU',     status: 'error', icon: '🎮', version: '4.2', requiredVendor: 'OpenVGA'  },
-  { id: 'ssd',     name: 'SSD',     status: 'ok',    icon: '💿', version: null },
-  { id: 'network', name: 'REDE',    status: 'error', icon: '🌐', version: '2.0', requiredVendor: 'NetCore'  },
-  { id: 'audio',   name: 'ÁUDIO',   status: 'ok',    icon: '🔊', version: null },
-]
-
-// driver correto para cada dispositivo com erro
-const CORRECT_DRIVERS = { gpu: 'd3', network: 'd6' }
-
-const DRIVERS = [
-  { id: 'd1', name: 'GPU Driver',     version: '4.2', vendor: 'BetaVGA',  forDevice: 'gpu'     },
-  { id: 'd2', name: 'GPU Driver',     version: '3.8', vendor: 'OpenVGA',  forDevice: 'gpu'     },
-  { id: 'd3', name: 'GPU Driver',     version: '4.2', vendor: 'OpenVGA',  forDevice: 'gpu'     },
-  { id: 'd4', name: 'Net Driver',     version: '2.0', vendor: 'NetAlpha', forDevice: 'network' },
-  { id: 'd5', name: 'Net Driver',     version: '1.9', vendor: 'NetCore',  forDevice: 'network' },
-  { id: 'd6', name: 'Net Driver',     version: '2.0', vendor: 'NetCore',  forDevice: 'network' },
-]
 
 const PEEK_PENALTY = 30
 const TABS = ['COMO JOGAR', 'TEORIA']
 
 export default function PuzzleGPU({ onSuccess, onFail, timerRef }) {
+  const { difficulty } = useGame()
+  const { playWrong } = useGameAudio()
+  const profile = getDifficultyProfile('gpu', difficulty)
+  const DEVICES = profile.devices
+  const DRIVERS = profile.drivers
+  const CORRECT_DRIVERS = Object.fromEntries(
+    DEVICES.filter(d => d.status === 'error').map(d => [d.id, DRIVERS.find(dr => dr.forDevice === d.id && dr.vendor === d.requiredVendor && dr.version === d.version)?.id])
+  )
   const [dragging, setDragging]         = useState(null)
   const [slots, setSlots]               = useState({ gpu: null, network: null })
   const [rejects, setRejects]           = useState({})
@@ -47,6 +37,7 @@ export default function PuzzleGPU({ onSuccess, onFail, timerRef }) {
     const correct = CORRECT_DRIVERS[deviceId]
 
     if (driver.id !== correct) {
+      playWrong()
       setRejects(r => ({ ...r, [deviceId]: true }))
       timerRef?.current?.addPenalty(20)
       setTimeout(() => setRejects(r => { const n = { ...r }; delete n[deviceId]; return n }), 700)

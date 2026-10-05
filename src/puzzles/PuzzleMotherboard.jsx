@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useGameAudio } from '../audio/useGameAudio'
 import './PuzzleMotherboard.css'
 
 const COMPONENTS = [
@@ -19,6 +20,7 @@ const PEEK_PENALTY = 30
 const TABS = ['COMO JOGAR', 'TEORIA']
 
 export default function PuzzleMotherboard({ onSuccess, onFail, timerRef }) {
+  const { playWrong } = useGameAudio()
   const [slots, setSlots]           = useState({}) // slotId → componentId
   const [dragging, setDragging]     = useState(null)
   const [rejects, setRejects]       = useState({})
@@ -41,6 +43,7 @@ export default function PuzzleMotherboard({ onSuccess, onFail, timerRef }) {
     const comp = COMPONENTS.find(c => c.id === dragging)
 
     if (slot.accepts !== comp.id) {
+      playWrong()
       setRejects(r => ({ ...r, [slotId]: true }))
       timerRef?.current?.addPenalty(15)
       setTimeout(() => setRejects(r => { const n = { ...r }; delete n[slotId]; return n }), 700)

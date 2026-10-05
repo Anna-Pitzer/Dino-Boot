@@ -1,5 +1,9 @@
+import { useEffect } from 'react'
 import { useGame } from '../hooks/useGame'
+import { useGameAudio } from '../audio/useGameAudio'
 import { PIECES } from '../data/pieces'
+import { ACHIEVEMENT_DEFS, getFinalResult, getRunAchievements } from '../data/achievements'
+import AchievementBadge from '../components/AchievementBadge'
 import './VictoryScreen.css'
 
 const DAMAGE_LABELS = {
@@ -23,8 +27,36 @@ function formatTotalTime(totalSeconds) {
 }
 
 export default function VictoryScreen() {
-  const { collectedPieces, damagedPieces, score, coins, totalTimeSeconds, resetGame } = useGame()
-  const failed = damagedPieces.length > 0
+  const { collectedPieces, damagedPieces, failedAttempts, score, coins, totalTimeSeconds, bestResult, newlyUnlockedAchievements, resetGame, usedHints, unlockedAchievements } = useGame()
+  const { playVictory, playBack } = useGameAudio()
+
+  useEffect(() => {
+    playVictory()
+  }, [playVictory])
+  const finalResult = getFinalResult({
+    collectedPieces,
+    damagedPieces,
+    failedAttempts,
+    totalTimeSeconds,
+    usedHints,
+    score,
+    coins,
+    allPieceCount: PIECES.length,
+  })
+  const failed = finalResult.rank === 'FAIL'
+  const runAchievements = getRunAchievements({
+    collectedPieces,
+    damagedPieces,
+    failedAttempts,
+    totalTimeSeconds,
+    usedHints,
+    allPieceCount: PIECES.length,
+  })
+
+  const displayAchievements = ACHIEVEMENT_DEFS.map(achievement => ({
+    ...achievement,
+    unlocked: unlockedAchievements.includes(achievement.id) || runAchievements.includes(achievement.id),
+  }))
 
   return (
     <div className={`vs-screen ${failed ? 'failed' : 'victory'}`}>
@@ -35,6 +67,23 @@ export default function VictoryScreen() {
             <div className="vs-icon">💀</div>
             <h1 className="vs-title error">FALHA NO BOOT</h1>
             <p className="vs-subtitle">O sistema não inicializou — componentes danificados detectados.</p>
+
+            <div className="vs-rank-card" style={{ borderColor: finalResult.accent, boxShadow: `0 0 20px ${finalResult.accent}40` }}>
+              <div className="vs-rank-badge" style={{ background: finalResult.accent }}>{finalResult.rank}</div>
+              <div className="vs-rank-copy">
+                <div className="vs-rank-label">{finalResult.label}</div>
+                <p>{finalResult.summary}</p>
+              </div>
+            </div>
+
+            <div className="vs-criteria">
+              <div className="vs-section-label">CRITÉRIOS DA CLASSIFICAÇÃO</div>
+              <ul className="vs-criteria-list">
+                {finalResult.criteria.map(item => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
 
             <div className="vs-damage-list">
               <div className="vs-section-label">COMPONENTES COM FALHA</div>
@@ -52,6 +101,23 @@ export default function VictoryScreen() {
             <h1 className="vs-title">BOOT CONCLUÍDO!</h1>
             <p className="vs-subtitle">O DinoBootOS inicializou com sucesso. Todos os sistemas operacionais.</p>
 
+            <div className="vs-rank-card" style={{ borderColor: finalResult.accent, boxShadow: `0 0 20px ${finalResult.accent}40` }}>
+              <div className="vs-rank-badge" style={{ background: finalResult.accent }}>{finalResult.rank}</div>
+              <div className="vs-rank-copy">
+                <div className="vs-rank-label">{finalResult.label}</div>
+                <p>{finalResult.summary}</p>
+              </div>
+            </div>
+
+            <div className="vs-criteria">
+              <div className="vs-section-label">CRITÉRIOS DA CLASSIFICAÇÃO</div>
+              <ul className="vs-criteria-list">
+                {finalResult.criteria.map(item => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
             <div className="vs-pieces">
               <div className="vs-section-label">PEÇAS COLETADAS</div>
               <div className="vs-pieces-grid">
@@ -60,6 +126,25 @@ export default function VictoryScreen() {
                     <img src={p.img} alt={p.name} />
                     <span>{p.name}</span>
                   </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="vs-achievements">
+              <div className="vs-section-label">MEDALHAS</div>
+              {newlyUnlockedAchievements.length > 0 && (
+                <p className="vs-achievement-feedback" role="status">
+                  ★ NOVAS MEDALHAS DESBLOQUEADAS NESTA PARTIDA ★
+                </p>
+              )}
+              <div className="vs-achievements-grid">
+                {displayAchievements.map(achievement => (
+                  <AchievementBadge
+                    key={achievement.id}
+                    achievement={achievement}
+                    unlocked={achievement.unlocked}
+                    newlyUnlocked={newlyUnlockedAchievements.includes(achievement.id)}
+                  />
                 ))}
               </div>
             </div>
@@ -85,7 +170,15 @@ export default function VictoryScreen() {
           </div>
         </div>
 
-        <button className="vs-btn" onClick={resetGame}>↩ JOGAR NOVAMENTE</button>
+        {bestResult && (
+          <div className="vs-best-result">
+            <span className="vs-best-result-label">MELHOR RESULTADO</span>
+            <span className="vs-best-result-score">{String(bestResult.score).padStart(6, '0')}</span>
+            <span className="vs-best-result-time">TEMPO {formatTotalTime(bestResult.timeSeconds)}</span>
+          </div>
+        )}
+
+        <button className="vs-btn" onClick={() => { playBack(); resetGame() }}>↩ JOGAR NOVAMENTE</button>
       </div>
     </div>
   )

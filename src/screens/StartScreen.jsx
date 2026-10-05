@@ -1,9 +1,11 @@
 import { useGame } from '../hooks/useGame'
+import { useGameAudio } from '../audio/useGameAudio'
 import { hasSave } from '../context/GameContext'
 import './StartScreen.css'
 
 export default function StartScreen() {
   const { score, startGame, resetGame } = useGame()
+  const { playButton } = useGameAudio()
   const saveExists = hasSave()
 
   return (
@@ -46,11 +48,11 @@ export default function StartScreen() {
             </button>
           )}
           {saveExists && (
-            <button className="arcade-button danger" onClick={() => { if (confirm('Apagar progresso salvo?')) resetGame() }}>
+            <button className="arcade-button danger" onClick={() => { playButton(); if (confirm('Apagar progresso salvo?')) resetGame() }}>
               ✕ RESETAR
             </button>
           )}
-          <button className="arcade-button" onClick={() => alert('📊 COMO JOGAR\n\n• Explore o mapa\n• Clique nas peças para resolver puzzles\n• Colete todas as 11 peças\n• Inicialize o computador!')}>
+          <button className="arcade-button" onClick={() => { playButton(); alert('📊 COMO JOGAR\n\n• Explore o mapa\n• Clique nas peças para resolver puzzles\n• Colete todas as 11 peças\n• Inicialize o computador!') }}>
             ⓘ COMO JOGAR
           </button>
         </div>

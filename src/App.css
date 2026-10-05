@@ -1,21 +1,46 @@
 :root {
-  --game-bg: #1a2540;
-  --game-bg-2: #304269;
+  --game-bg: #0b1320;
+  --game-bg-2: #1a2540;
   --game-accent: #F26101;
-  --game-accent-hover: #ff7f1a;
+  --game-accent-hover: #ff8a3d;
   --game-blue-light: #91BED4;
-  --game-blue-lighter: #D9E8F5;
+  --game-blue-lighter: #dfeef8;
   --game-white: #ffffff;
   --game-success: #4caf50;
   --game-error: #f44336;
   --game-font: 'Press Start 2P', cursive;
 }
 
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(242,97,1,0.15), transparent 28%),
+    radial-gradient(circle at bottom, rgba(145,190,212,0.12), transparent 30%),
+    #0b1320;
+}
+
+body {
+  font-family: var(--game-font);
+  color: var(--game-white);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button, input, select {
+  font: inherit;
+}
+
 .screen-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
   font-size: 20px;
   color: var(--game-white);
   background: var(--game-bg);

@@ -1,26 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useGame } from '../hooks/useGame'
+import { useGameAudio } from '../audio/useGameAudio'
+import { getDifficultyProfile } from '../data/difficulty'
 import './PuzzleRAM.css'
-
-const BLOCKS = [
-  { id: 'b1', size: 10,  locked: true,  label: 'KERNEL' },
-  { id: 'b2', size: 20,  locked: false },
-  { id: 'b3', size: 30,  locked: false },
-  { id: 'b4', size: 15,  locked: false },
-  { id: 'b5', size: 10,  locked: false },
-  { id: 'b6', size: 25,  locked: false },
-]
-
-const PROGRAMS = [
-  { id: 'so',        name: 'S.O.',       size: 20, color: '#F26101' },
-  { id: 'navegador', name: 'NAVEGADOR',  size: 20, color: '#91BED4' },
-  { id: 'jogo',      name: 'JOGO',       size: 30, color: '#a855f7' },
-  { id: 'editor',    name: 'EDITOR',     size: 10, color: '#4caf50' },
-]
 
 const PEEK_PENALTY = 30
 const TABS = ['COMO JOGAR', 'TEORIA']
 
 export default function PuzzleRAM({ onSuccess, onFail, timerRef }) {
+  const { difficulty } = useGame()
+  const { playWrong } = useGameAudio()
+  const profile = getDifficultyProfile('ram', difficulty)
+  const BLOCKS = profile.blocks
+  const PROGRAMS = profile.programs
   // blockId → programId
   const [allocations, setAllocations] = useState({})
   const [dragging, setDragging]       = useState(null) // programId
@@ -30,6 +22,13 @@ export default function PuzzleRAM({ onSuccess, onFail, timerRef }) {
   const [peeked, setPeeked]           = useState(false)
   const [showAnswer, setShowAnswer]   = useState(false)
   const [submitted, setSubmitted]     = useState(false)
+
+  useEffect(() => {
+    setAllocations({})
+    setDragging(null)
+    setRejects({})
+    setSubmitted(false)
+  }, [difficulty])
 
   const allocatedPrograms = new Set(Object.values(allocations))
   const freePrograms = PROGRAMS.filter(p => !allocatedPrograms.has(p.id))
@@ -43,6 +42,7 @@ export default function PuzzleRAM({ onSuccess, onFail, timerRef }) {
 
     if (program.size > block.size) {
       // flash de rejeição
+      playWrong()
       setRejects(r => ({ ...r, [blockId]: true }))
       setTimeout(() => setRejects(r => { const n = { ...r }; delete n[blockId]; return n }), 600)
       setDragging(null)
@@ -122,14 +122,14 @@ export default function PuzzleRAM({ onSuccess, onFail, timerRef }) {
       )}
 
       {/* Memória */}
-      <div className="ram-section-label">MEMÓRIA RAM — 110 MB</div>
+      <div className="ram-section-label">MEMÓRIA RAM — {profile.total} MB</div>
       <div className="ram-memory">
         {BLOCKS.map(block => {
           const allocProg = allocations[block.id]
             ? PROGRAMS.find(p => p.id === allocations[block.id])
             : null
           const isReject = rejects[block.id]
-          const pct = (block.size / 110) * 100
+          const pct = (block.size / profile.total) * 100
 
           return (
             <div

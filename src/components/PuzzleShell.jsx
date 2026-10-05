@@ -1,7 +1,9 @@
 import { useRef, useState, useCallback } from 'react'
 import { useGame } from '../hooks/useGame'
+import { useGameAudio } from '../audio/useGameAudio'
 import { PIECES } from '../data/pieces'
 import Timer from './Timer'
+import HintSystem from './HintSystem'
 import './PuzzleShell.css'
 
 import PuzzleCPU         from '../puzzles/PuzzleCPU'
@@ -32,26 +34,31 @@ const PUZZLE_MAP = {
 }
 
 export default function PuzzleShell() {
-  const { activePuzzle, lives, coins, completePuzzle, failPuzzle, closePuzzle } = useGame()
+  const { activePuzzle, lives, coins, completePuzzle, failPuzzle, closePuzzle, supportNotes } = useGame()
+  const { playCorrect, playWrong, playButton, playBack } = useGameAudio()
   const timerRef = useRef(null)
   const [feedback, setFeedback] = useState(null) // 'success' | 'error' | null
   const [running, setRunning] = useState(true)
+  const [hintOpen, setHintOpen] = useState(false)
 
   const piece = PIECES.find(p => p.id === activePuzzle)
   const PuzzleComponent = PUZZLE_MAP[activePuzzle]
+  const activeSupportNotes = activePuzzle ? supportNotes[activePuzzle] ?? [] : []
 
   const handleSuccess = useCallback(() => {
+    playCorrect()
     setRunning(false)
     setFeedback('success')
     const bonus = timerRef.current?.getTimeBonus() ?? 0
     setTimeout(() => completePuzzle(activePuzzle, bonus), 1200)
-  }, [activePuzzle, completePuzzle])
+  }, [activePuzzle, completePuzzle, playCorrect])
 
   const handleFail = useCallback(() => {
+    playWrong()
     setRunning(false)
     setFeedback('error')
     setTimeout(() => failPuzzle(activePuzzle), 1200)
-  }, [activePuzzle, failPuzzle])
+  }, [activePuzzle, failPuzzle, playWrong])
 
   if (!piece) return null
 
@@ -86,8 +93,24 @@ export default function PuzzleShell() {
             <span className="puzzle-stat-label">MOEDAS</span>
             <span className="puzzle-stat-value coins">🪙 {coins}</span>
           </div>
+          <div className="puzzle-hint-wrap">
+            <button className="puzzle-hint-btn" onClick={() => { playButton(); setHintOpen(true) }}>💡 DICA</button>
+          </div>
         </div>
       </div>
+
+      {hintOpen && <HintSystem puzzleId={activePuzzle} onClose={() => setHintOpen(false)} />}
+
+      {activeSupportNotes.length > 0 && (
+        <div className="puzzle-support-panel">
+          <div className="puzzle-support-header">SUPORTE ATIVADO</div>
+          <ul className="puzzle-support-list">
+            {activeSupportNotes.map((note, index) => (
+              <li key={`${note}-${index}`}>{note}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Feedback overlay */}
       {feedback === 'success' && (
@@ -126,7 +149,7 @@ export default function PuzzleShell() {
 
       {/* Footer */}
       <div className="puzzle-footer">
-        <button className="puzzle-back-btn" onClick={closePuzzle} disabled={!!feedback}>
+        <button className="puzzle-back-btn" onClick={() => { playBack(); closePuzzle() }} disabled={!!feedback}>
           ↩ VOLTAR AO MAPA
         </button>
       </div>

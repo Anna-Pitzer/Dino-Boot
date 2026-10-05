@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useGameAudio } from '../audio/useGameAudio'
 import './PuzzlePrinter.css'
 
 // ── Fase 1: ordenar por prioridade (1=alta) e desempatar por páginas ──
@@ -38,6 +39,7 @@ const PRIORITY_LABEL = { 1: 'ALTA', 2: 'MÉDIA', 3: 'BAIXA' }
 const PRIORITY_COLOR = { 1: 'pri-high', 2: 'pri-mid', 3: 'pri-low' }
 
 export default function PuzzlePrinter({ onSuccess, onFail, timerRef }) {
+  const { playWrong } = useGameAudio()
   const [phase, setPhase]           = useState(1)
 
   // Fase 1
@@ -80,6 +82,7 @@ export default function PuzzlePrinter({ onSuccess, onFail, timerRef }) {
   function confirmPhase1() {
     const ok = queue1.every((d, i) => d.id === ORDER_P1[i])
     if (!ok) {
+      playWrong()
       setWrongFlash1(true)
       setTimeout(() => setWrongFlash1(false), 700)
       timerRef?.current?.addPenalty(WRONG_PENALTY)
@@ -111,6 +114,7 @@ export default function PuzzlePrinter({ onSuccess, onFail, timerRef }) {
   function confirmPhase2() {
     const idx = queue2.findIndex(d => d.id === 'urgent')
     if (idx !== URGENT_CORRECT_IDX) {
+      playWrong()
       setWrongFlash2(true)
       setTimeout(() => setWrongFlash2(false), 700)
       timerRef?.current?.addPenalty(WRONG_PENALTY)

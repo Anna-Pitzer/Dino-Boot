@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "howler": "^2.2.4",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-sounds": "^1.0.30"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

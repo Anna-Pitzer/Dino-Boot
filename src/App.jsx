@@ -7,11 +7,22 @@ import PuzzleShell  from './components/PuzzleShell'
 import ShopScreen   from './screens/ShopScreen'
 import PuzzleBoot   from './puzzles/PuzzleBoot'
 import VictoryScreen from './screens/VictoryScreen'
+import CodexScreen  from './screens/CodexScreen'
+import { GameAudioProvider } from './audio/GameAudio'
+import { useGameAudio } from './audio/useGameAudio'
+import AudioSettings from './audio/AudioSettings'
 import './App.css'
 
 function BootWrapper() {
   const { completeGame, resetGame } = useGame()
-  return <PuzzleBoot onSuccess={() => completeGame()} onFail={resetGame} />
+  const { playGameOver } = useGameAudio()
+
+  function handleFail() {
+    playGameOver()
+    resetGame()
+  }
+
+  return <PuzzleBoot onSuccess={() => completeGame()} onFail={handleFail} />
 }
 
 function GameRouter() {
@@ -34,14 +45,18 @@ function GameRouter() {
   if (currentScreen === 'puzzle')  return <PuzzleShell />
   if (currentScreen === 'shop')    return <ShopScreen />
   if (currentScreen === 'boot')    return <BootWrapper />
+  if (currentScreen === 'codex')   return <CodexScreen />
   if (currentScreen === 'victory') return <VictoryScreen />
   return null
 }
 
 export default function App() {
   return (
-    <GameProvider>
-      <GameRouter />
-    </GameProvider>
+    <GameAudioProvider>
+      <GameProvider>
+        <GameRouter />
+        <AudioSettings />
+      </GameProvider>
+    </GameAudioProvider>
   )
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useGameAudio } from '../audio/useGameAudio'
 import './PuzzleHeadset.css'
 
 const DEVICES = [
@@ -20,6 +21,7 @@ const PEEK_PENALTY  = 30
 const TABS = ['COMO JOGAR', 'TEORIA']
 
 export default function PuzzleHeadset({ onSuccess, onFail, timerRef }) {
+  const { playWrong } = useGameAudio()
   const [slots, setSlots]           = useState({ input: null, output: null })
   const [dragging, setDragging]     = useState(null)
   const [wrongSlot, setWrongSlot]   = useState(null)
@@ -35,12 +37,14 @@ export default function PuzzleHeadset({ onSuccess, onFail, timerRef }) {
   function handleDrop(slotId) {
     if (!dragging) return
     if (slots[slotId]) {
+      playWrong()
       setWrongSlot(slotId)
       setTimeout(() => setWrongSlot(null), 600)
       setDragging(null)
       return
     }
     if (CORRECT[slotId] !== dragging) {
+      playWrong()
       setWrongSlot(slotId)
       setTimeout(() => setWrongSlot(null), 600)
       timerRef?.current?.addPenalty(WRONG_PENALTY)

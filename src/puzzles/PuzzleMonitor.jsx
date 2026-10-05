@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useGameAudio } from '../audio/useGameAudio'
 import './PuzzleMonitor.css'
 
 // Especificações do monitor alvo
@@ -57,6 +58,7 @@ const PREVIEW_LINES = [
 ]
 
 export default function PuzzleMonitor({ onSuccess, onFail, timerRef }) {
+  const { playWrong } = useGameAudio()
   const [phase, setPhase]           = useState(0)
   const [selected, setSelected]     = useState(null)
   const [confirmed, setConfirmed]   = useState(false)
@@ -80,6 +82,7 @@ export default function PuzzleMonitor({ onSuccess, onFail, timerRef }) {
     const opt = current.options.find(o => o.id === selected)
 
     if (!opt.correct) {
+      playWrong()
       setWrongFlash(true)
       setTimeout(() => setWrongFlash(false), 700)
       timerRef?.current?.addPenalty(WRONG_PENALTY)

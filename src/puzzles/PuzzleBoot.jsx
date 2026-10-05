@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useGame } from '../hooks/useGame'
+import { useGameAudio } from '../audio/useGameAudio'
+import { SHOP_ITEMS } from '../data/shopItems'
 import './PuzzleBoot.css'
 
 const STEPS_CORRECT = [
@@ -13,7 +15,16 @@ const STEPS_CORRECT = [
   { id: 'display',    label: 'Exibir tela do SO'      },
 ]
 
-// Peça danificada → mensagem de erro no boot
+const BOOT_PHASES = [
+  { key: 'bios', label: 'BIOS/UEFI', detail: 'Inicializando firmware e memória' },
+  { key: 'hardware', label: 'Hardware', detail: 'Detectando dispositivos e barramentos' },
+  { key: 'ssd', label: 'SSD', detail: 'Localizando sistema de arquivos' },
+  { key: 'bootloader', label: 'Bootloader', detail: 'Carregando ambiente de inicialização' },
+  { key: 'kernel', label: 'Kernel', detail: 'Executando módulos do sistema' },
+  { key: 'processes', label: 'Processos', detail: 'Subindo serviços e daemons' },
+  { key: 'display', label: 'Sistema', detail: 'Exibindo desktop e serviços finais' },
+]
+
 const DAMAGE_ERRORS = {
   cpu:         'ERRO: CPU danificada — falha no escalonamento',
   ram:         'ERRO: RAM danificada — falha na alocação de memória',
@@ -29,32 +40,42 @@ const DAMAGE_ERRORS = {
 }
 
 const WRONG_PENALTY = 20
-const PEEK_PENALTY  = 30
+const PEEK_PENALTY = 30
 const TABS = ['COMO JOGAR', 'TEORIA']
 
 function shuffle(arr) {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]]
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
   }
   return a
 }
 
 export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
-  const { damagedPieces } = useGame()
+  const { damagedPieces, selectedSetup } = useGame()
+  const { playBoot, playWrong, playButton } = useGameAudio()
 
-  const [queue, setQueue]           = useState(() => shuffle(STEPS_CORRECT))
-  const [dragging, setDragging]     = useState(null)
-  const [dragOver, setDragOver]     = useState(null)
-  const [confirmed, setConfirmed]   = useState(false)
-  const [booting, setBooting]       = useState(false)
-  const [bootLog, setBootLog]       = useState([])
+  const [queue, setQueue] = useState(() => shuffle(STEPS_CORRECT))
+  const [dragging, setDragging] = useState(null)
+  const [dragOver, setDragOver] = useState(null)
+  const [confirmed, setConfirmed] = useState(false)
+  const [booting, setBooting] = useState(false)
+  const [bootLog, setBootLog] = useState([])
   const [bootFailed, setBootFailed] = useState(false)
-  const [helpOpen, setHelpOpen]     = useState(false)
-  const [helpTab, setHelpTab]       = useState(0)
-  const [peeked, setPeeked]         = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [helpTab, setHelpTab] = useState(0)
+  const [peeked, setPeeked] = useState(false)
   const [showAnswer, setShowAnswer] = useState(false)
+  const [activePhase, setActivePhase] = useState(0)
+  const [phaseProgress, setPhaseProgress] = useState(0)
+
+  const setupList = Object.entries(selectedSetup || {})
+    .filter(([key]) => key !== 'suporte')
+    .map(([key, itemId]) => {
+      const item = SHOP_ITEMS.find(entry => entry.id === itemId)
+      return { key, itemId, name: item?.name ?? 'Personalização', icon: item?.icon ?? '⬜' }
+    })
 
   function handleDragStart(id) { setDragging(id) }
   function handleDragOver(e, id) { e.preventDefault(); setDragOver(id) }
@@ -65,7 +86,7 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
     setQueue(prev => {
       const next = [...prev]
       const fromIdx = next.findIndex(s => s.id === dragging)
-      const toIdx   = next.findIndex(s => s.id === targetId)
+      const toIdx = next.findIndex(s => s.id === targetId)
       ;[next[fromIdx], next[toIdx]] = [next[toIdx], next[fromIdx]]
       return next
     })
@@ -77,8 +98,8 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
     if (confirmed) return
     const isCorrect = queue.every((s, i) => s.id === STEPS_CORRECT[i].id)
     if (!isCorrect) {
+      playWrong()
       timerRef?.current?.addPenalty(WRONG_PENALTY)
-      // shake feedback — re-render via key trick
       setConfirmed('wrong')
       setTimeout(() => setConfirmed(false), 600)
       return
@@ -88,22 +109,26 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
   }
 
   async function runBootSequence() {
+    playBoot()
     setBooting(true)
     const log = []
 
-    for (let i = 0; i < STEPS_CORRECT.length; i++) {
-      await new Promise(r => setTimeout(r, 400))
-      log.push({ text: `[ OK ] ${STEPS_CORRECT[i].label}`, ok: true })
+    for (let i = 0; i < BOOT_PHASES.length; i++) {
+      setActivePhase(i)
+      for (let progress = 0; progress <= 100; progress += 10) {
+        setPhaseProgress(progress)
+        await new Promise(resolve => setTimeout(resolve, 70))
+      }
+
+      log.push({ text: `[ OK ] ${BOOT_PHASES[i].label} — ${BOOT_PHASES[i].detail}`, ok: true })
       setBootLog([...log])
     }
 
-    // Verificar peças danificadas
-    await new Promise(r => setTimeout(r, 300))
+    await new Promise(r => setTimeout(r, 250))
     const errors = damagedPieces.map(id => DAMAGE_ERRORS[id]).filter(Boolean)
-
     if (errors.length > 0) {
       for (const err of errors) {
-        await new Promise(r => setTimeout(r, 500))
+        await new Promise(r => setTimeout(r, 400))
         log.push({ text: err, ok: false })
         setBootLog([...log])
       }
@@ -112,16 +137,20 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
       setBootLog([...log])
       setBootFailed(true)
       setTimeout(() => onFail?.(), 1500)
-    } else {
-      await new Promise(r => setTimeout(r, 400))
-      log.push({ text: 'BOOT CONCLUÍDO — BEM-VINDO AO DINOBOOT OS!', ok: true })
-      setBootLog([...log])
-      setTimeout(() => onSuccess(), 1200)
+      return
     }
+
+    await new Promise(r => setTimeout(r, 350))
+    log.push({ text: 'BOOT CONCLUÍDO — BEM-VINDO AO DINOBOOT OS!', ok: true })
+    setBootLog([...log])
+    setTimeout(() => onSuccess(), 1200)
   }
 
   function handlePeek() {
-    if (!peeked) { timerRef?.current?.addPenalty(PEEK_PENALTY); setPeeked(true) }
+    if (!peeked) {
+      timerRef?.current?.addPenalty(PEEK_PENALTY)
+      setPeeked(true)
+    }
     setShowAnswer(a => !a)
   }
 
@@ -130,17 +159,57 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
       <div className="pb-puzzle">
         <div className={`pb-terminal ${bootFailed ? 'failed' : ''}`}>
           <div className="pb-terminal-bar">
-            <span className="pb-terminal-title">DINOBOOT OS — SEQUÊNCIA DE BOOT</span>
+            <span className="pb-terminal-title">DINOBOOT BIOS v1.0</span>
           </div>
+
           <div className="pb-terminal-body">
-            {bootLog.map((line, i) => (
-              <div key={i} className={`pb-log-line ${line.ok ? 'ok' : 'err'}`}>
-                {line.text}
+            <div className="pb-setup-banner">
+              <span className="pb-banner-label">SETUP</span>
+              <div className="pb-setup-icons">
+                {setupList.map(({ key, itemId, icon, name }) => (
+                  <span key={key} className="pb-setup-item" title={`${key}: ${name}`}>
+                    {itemId.includes('none') ? '⬜' : icon}
+                  </span>
+                ))}
               </div>
-            ))}
-            {!bootFailed && bootLog.length < STEPS_CORRECT.length + 1 && (
-              <div className="pb-cursor">_</div>
-            )}
+            </div>
+
+            <div className="pb-phase-list">
+              {BOOT_PHASES.map((phase, index) => {
+                const isDone = index < activePhase || (bootFailed && index <= activePhase)
+                const isActive = index === activePhase && !bootFailed
+                return (
+                  <div key={phase.key} className={`pb-phase ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`}>
+                    <div className="pb-phase-header">
+                      <span>{phase.label}</span>
+                      <span>{isDone ? 'OK' : isActive ? `${phaseProgress}%` : 'WAIT'}</span>
+                    </div>
+                    <div className="pb-phase-bar">
+                      <span style={{ width: isDone ? '100%' : isActive ? `${phaseProgress}%` : '0%' }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="pb-status-grid">
+              {BOOT_PHASES.map((phase, index) => (
+                <div key={`${phase.key}-status`} className={`pb-status-item ${index <= activePhase ? 'online' : ''}`}>
+                  [{index <= activePhase ? 'OK' : 'WAIT'}] {phase.label}
+                </div>
+              ))}
+            </div>
+
+            <div className="pb-log-box">
+              {bootLog.map((line, i) => (
+                <div key={i} className={`pb-log-line ${line.ok ? 'ok' : 'err'}`}>
+                  {line.text}
+                </div>
+              ))}
+              {!bootFailed && bootLog.length < BOOT_PHASES.length + 1 && (
+                <div className="pb-cursor">_</div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -149,9 +218,8 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
 
   return (
     <div className="pb-puzzle">
-
       <div className="pb-help-bar">
-        <button className="pb-help-toggle" onClick={() => setHelpOpen(o => !o)}>
+        <button className="pb-help-toggle" onClick={() => { playButton(); setHelpOpen(o => !o) }}>
           {helpOpen ? '▲ FECHAR' : '? AJUDA'}
         </button>
       </div>
@@ -235,7 +303,6 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
       >
         {confirmed === 'wrong' ? '✗ ORDEM INCORRETA' : '▶ INICIAR BOOT'}
       </button>
-
     </div>
   )
 }

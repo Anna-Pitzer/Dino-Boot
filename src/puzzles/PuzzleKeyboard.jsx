@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useGameAudio } from '../audio/useGameAudio'
 import './PuzzleKeyboard.css'
 
 // Fase 1: pares embaralhados para conectar
@@ -23,6 +24,7 @@ function shuffle(arr) {
 }
 
 export default function PuzzleKeyboard({ onSuccess, onFail, timerRef }) {
+  const { playWrong } = useGameAudio()
   const [phase, setPhase] = useState(1)
 
   // Fase 1
@@ -134,6 +136,7 @@ export default function PuzzleKeyboard({ onSuccess, onFail, timerRef }) {
 
     const correct = PAIRS.find(p => p.key === keyVal)?.code === codeVal
     if (!correct) {
+      playWrong()
       setWrongFlash(keyVal)
       setTimeout(() => setWrongFlash(null), 600)
       timerRef?.current?.addPenalty(10)
@@ -148,6 +151,7 @@ export default function PuzzleKeyboard({ onSuccess, onFail, timerRef }) {
   function handlePhase1Confirm() {
     const allCorrect = PAIRS.every(p => connections[p.key] === p.code)
     if (!allCorrect) {
+      playWrong()
       // flash nas erradas
       PAIRS.forEach(p => {
         if (connections[p.key] !== p.code) {
@@ -180,6 +184,7 @@ export default function PuzzleKeyboard({ onSuccess, onFail, timerRef }) {
         setTimeout(() => onSuccess(), 600)
       }
     } else {
+      playWrong()
       setWrongKey(key)
       setTimeout(() => setWrongKey(null), 500)
       timerRef?.current?.addPenalty(10)

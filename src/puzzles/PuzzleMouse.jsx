@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useGameAudio } from '../audio/useGameAudio'
 import './PuzzleMouse.css'
 
 const COLS = 9
@@ -48,6 +49,7 @@ function calcTarget() {
 const TARGET = calcTarget()
 
 export default function PuzzleMouse({ onSuccess, onFail, timerRef }) {
+  const { playWrong } = useGameAudio()
   // 'memorize' → sequência visível com countdown | 'execute' → sequência oculta
   const [phase, setPhase]           = useState('memorize')
   const [countdown, setCountdown]   = useState(MEMORIZE_SECS)
@@ -77,6 +79,7 @@ export default function PuzzleMouse({ onSuccess, onFail, timerRef }) {
     const expected = SEQUENCE[step]
 
     if (arrow !== expected) {
+      playWrong()
       setWrongArrow(arrow)
       setTimeout(() => setWrongArrow(null), 500)
       timerRef?.current?.addPenalty(15)
@@ -86,6 +89,7 @@ export default function PuzzleMouse({ onSuccess, onFail, timerRef }) {
     const next = applyMove(cursor, arrow)
 
     if (isObstacle(next)) {
+      playWrong()
       // bate no obstáculo → reseta posição e step
       setHitObstacle(next)
       setTimeout(() => setHitObstacle(null), 600)

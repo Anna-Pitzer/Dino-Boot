@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useGameAudio } from '../audio/useGameAudio'
 import './PuzzlePendrive.css'
 
 const DEVICES = [
@@ -23,6 +24,7 @@ const PEEK_PENALTY  = 30
 const TABS = ['COMO JOGAR', 'TEORIA']
 
 export default function PuzzlePendrive({ onSuccess, onFail, timerRef }) {
+  const { playWrong } = useGameAudio()
   const [phase, setPhase]           = useState(1) // 1=selecionar, 2=montar, 3=navegar
   const [selected, setSelected]     = useState(null)
   const [wrongDev, setWrongDev]     = useState(null)
@@ -37,6 +39,7 @@ export default function PuzzlePendrive({ onSuccess, onFail, timerRef }) {
   function handleSelectDevice(dev) {
     if (phase !== 1) return
     if (!dev.correct) {
+      playWrong()
       setWrongDev(dev.id)
       setTimeout(() => setWrongDev(null), 600)
       timerRef?.current?.addPenalty(WRONG_PENALTY)
@@ -62,6 +65,7 @@ export default function PuzzlePendrive({ onSuccess, onFail, timerRef }) {
   function handleFileClick(node) {
     if (node.type === 'dir') { toggleDir(node.path); return }
     if (node.target) { setTimeout(onSuccess, 400); return }
+    playWrong()
     setWrongFile(node.path)
     setTimeout(() => setWrongFile(null), 600)
     timerRef?.current?.addPenalty(WRONG_PENALTY)

@@ -21,11 +21,21 @@ export const SHOP_ITEMS = [
   { id: 'deco-mug',     category: 'decoracao',  name: 'Caneca',             price: 15,  icon: '☕',  desc: 'Café para codar' },
 ]
 
+export const SUPPORT_ITEMS = [
+  { id: 'scanner', category: 'suporte', name: 'Scanner', price: 70, icon: '🔎', desc: 'Revela uma pista extra sobre o puzzle atual.', limit: 1 },
+  { id: 'manual_tecnico', category: 'suporte', name: 'Manual Técnico', price: 60, icon: '📘', desc: 'Desbloqueia uma explicação conceitual do componente.', limit: 1 },
+  { id: 'kit_tecnico', category: 'suporte', name: 'Kit Técnico', price: 90, icon: '🧰', desc: 'Restaura 1 vida quando o sistema estiver instável.', limit: 2 },
+  { id: 'checkpoint', category: 'suporte', name: 'Checkpoint', price: 110, icon: '💾', desc: 'Guarda o progresso atual para recuperar a partida.', limit: 1 },
+]
+
+export const SHOP_ITEMS_WITH_SUPPORT = [...SHOP_ITEMS, ...SUPPORT_ITEMS]
+
 export const CATEGORIES = [
   { id: 'gabinete',  label: 'GABINETE'   },
   { id: 'mousepad',  label: 'MOUSEPAD'   },
   { id: 'abajur',    label: 'ABAJUR'     },
   { id: 'decoracao', label: 'DECORAÇÃO'  },
+  { id: 'suporte',   label: 'SUPORTE'    },
 ]
 
 export const DEFAULT_SETUP = {
@@ -33,4 +43,17 @@ export const DEFAULT_SETUP = {
   mousepad:  'pad-small',
   abajur:    'lamp-none',
   decoracao: 'deco-none',
+  suporte:   'support-none',
 }
+
+export const SUPPORT_NONE_ITEM = {
+  id: 'support-none',
+  category: 'suporte',
+  name: 'Sem item de suporte',
+  price: 0,
+  icon: '⬜',
+  desc: 'Nenhum item de suporte ativado',
+  limit: 0,
+}
+
+export const SHOP_ITEMS_FULL = [...SHOP_ITEMS, ...SUPPORT_ITEMS, SUPPORT_NONE_ITEM]

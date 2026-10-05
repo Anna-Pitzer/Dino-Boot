@@ -1,15 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useGame } from '../hooks/useGame'
+import { getDifficultyProfile } from '../data/difficulty'
 import './PuzzleCPU.css'
-
-const QUANTUM = 2
-
-const PROCESSES = [
-  { id: 'A', burst: 4, color: '#F26101' },
-  { id: 'B', burst: 2, color: '#91BED4' },
-  { id: 'C', burst: 6, color: '#a855f7' },
-  { id: 'D', burst: 3, color: '#4caf50' },
-  { id: 'E', burst: 2, color: '#f5c518' },
-]
 
 function calcRoundRobin(processes, quantum) {
   const queue = processes.map(p => ({ ...p, remaining: p.burst }))
@@ -27,23 +19,27 @@ function calcRoundRobin(processes, quantum) {
   return order
 }
 
-const CORRECT = calcRoundRobin(PROCESSES, QUANTUM)
-
-function buildTokens() {
-  const tokens = []
-  PROCESSES.forEach(p => {
-    for (let i = 0; i < p.burst; i++) {
-      tokens.push({ key: `${p.id}-${i}`, id: p.id, color: p.color })
-    }
-  })
-  return tokens
-}
-
 const TABS = ['COMO JOGAR', 'TEORIA']
 const PEEK_PENALTY = 30
 
 export default function PuzzleCPU({ onSuccess, onFail, timerRef }) {
-  const [available, setAvailable] = useState(buildTokens)
+  const { difficulty } = useGame()
+  const profile = getDifficultyProfile('cpu', difficulty)
+  const PROCESSES = profile.processes
+  const QUANTUM = profile.quantum
+  const CORRECT = calcRoundRobin(PROCESSES, QUANTUM)
+
+  const buildTokens = () => {
+    const tokens = []
+    PROCESSES.forEach(p => {
+      for (let i = 0; i < p.burst; i++) {
+        tokens.push({ key: `${p.id}-${i}`, id: p.id, color: p.color })
+      }
+    })
+    return tokens
+  }
+
+  const [available, setAvailable] = useState(() => buildTokens())
   const [queue, setQueue]         = useState([])
   const [result, setResult]       = useState(null)
   const [dragSrc, setDragSrc]     = useState(null)
@@ -51,6 +47,12 @@ export default function PuzzleCPU({ onSuccess, onFail, timerRef }) {
   const [helpTab, setHelpTab]     = useState(0)
   const [peeked, setPeeked]       = useState(false)
   const [showAnswer, setShowAnswer] = useState(false)
+
+  useEffect(() => {
+    setAvailable(buildTokens())
+    setQueue([])
+    setResult(null)
+  }, [difficulty])
 
   const process = p => PROCESSES.find(x => x.id === p)
 

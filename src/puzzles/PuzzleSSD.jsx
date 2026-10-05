@@ -1,16 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useGame } from '../hooks/useGame'
+import { useGameAudio } from '../audio/useGameAudio'
+import { getDifficultyProfile } from '../data/difficulty'
 import './PuzzleSSD.css'
-
-const FILES = [
-  { id: 'foto',     name: 'foto.png',       folder: 'Imagens',    icon: '🖼️' },
-  { id: 'trabalho', name: 'trabalho.docx',  folder: 'Documentos', icon: '📄' },
-  { id: 'sistema',  name: 'sistema.conf',   folder: 'Sistema',    icon: '⚙️' },
-  { id: 'jogo',     name: 'jogo.exe',       folder: 'Programas',  icon: '🎮' },
-  { id: 'musica',   name: 'musica.mp3',     folder: 'Música',     icon: '🎵' },
-  { id: 'video',    name: 'video.mp4',      folder: 'Imagens',    icon: '🎬' },
-  { id: 'relatorio',name: 'relatorio.pdf',  folder: 'Documentos', icon: '📋' },
-  { id: 'driver',   name: 'driver.exe',     folder: 'Programas',  icon: '💾' },
-]
 
 const FOLDERS = ['Documentos', 'Imagens', 'Sistema', 'Programas', 'Música']
 
@@ -39,6 +31,11 @@ const PEEK_PENALTY = 30
 const TABS = ['COMO JOGAR', 'TEORIA']
 
 export default function PuzzleSSD({ onSuccess, onFail, timerRef }) {
+  const { difficulty } = useGame()
+  const { playWrong } = useGameAudio()
+  const profile = getDifficultyProfile('ssd', difficulty)
+  const FILES = profile.files
+
   const [phase, setPhase]           = useState(1)
   const [placements, setPlacements] = useState({}) // fileId → folderName
   const [dragging, setDragging]     = useState(null)
@@ -48,6 +45,15 @@ export default function PuzzleSSD({ onSuccess, onFail, timerRef }) {
   const [helpTab, setHelpTab]       = useState(0)
   const [peeked, setPeeked]         = useState(false)
   const [showAnswer, setShowAnswer] = useState(false)
+
+  useEffect(() => {
+    setPlacements({})
+    setPhase(1)
+    setDragging(null)
+    setRejects({})
+    setWrongClick(null)
+    setShowAnswer(false)
+  }, [difficulty])
 
   const placedFiles = new Set(Object.keys(placements))
   const allPlaced   = placedFiles.size === FILES.length
@@ -61,6 +67,7 @@ export default function PuzzleSSD({ onSuccess, onFail, timerRef }) {
     if (!file) return
 
     if (file.folder !== folderName) {
+      playWrong()
       setRejects(r => ({ ...r, [folderName]: true }))
       setTimeout(() => setRejects(r => { const n = { ...r }; delete n[folderName]; return n }), 600)
       setDragging(null)
@@ -77,6 +84,7 @@ export default function PuzzleSSD({ onSuccess, onFail, timerRef }) {
 
   function handlePhase1Confirm() {
     if (!allCorrect) {
+      playWrong()
       // encontra pastas erradas e flash
       const wrong = {}
       Object.entries(placements).forEach(([fid, folder]) => {
@@ -95,6 +103,7 @@ export default function PuzzleSSD({ onSuccess, onFail, timerRef }) {
     if (node.correct) {
       setTimeout(() => onSuccess(), 600)
     } else {
+      playWrong()
       setWrongClick(node.path)
       setTimeout(() => setWrongClick(null), 700)
       timerRef?.current?.addPenalty(20)
