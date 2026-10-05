@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev
 export default defineConfig({
   plugins: [react()],
-  base: "/dinoboot/",
+  base: "/Dino-Boot/",
 })
