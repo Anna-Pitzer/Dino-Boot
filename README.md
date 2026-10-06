@@ -11,6 +11,8 @@
 
 Curso: Ciência da Computação | Turma: A
 
+Visualize o jogo: https://anna-pitzer.github.io/Dino-Boot/
+
 Aplicação web em estilo RPG/arcade inspirada em manutenção de hardware e troubleshooting de sistemas operacionais. O projeto simula a jornada de recuperar e montar um setup computacional, passando por mapa, puzzles, loja de customização e boot final do sistema.
 
 > **Estado do projeto:** o ciclo principal do jogo está implementado e integrado, incluindo mapa, puzzles, loja, Codex, diagnóstico, áudio, persistência, navegação e tela final com tempo total do jogador.
@@ -110,9 +112,8 @@ npm run preview
 2. Exploração do mapa com movimentação do dinossauro até cada peça
 3. Resolução dos 11 puzzles de componentes eletrônicos e manutenção de vidas
 4. Geração automática de score e moedas conforme progresso e tempo
-5. Loja de customização do setup após coletar todas as peças
-6. Puzzle final de boot do sistema validando a sequência de inicialização
-7. Tela final com medalhas conquistadas, score, tempo total e melhor resultado salvo
+5. Puzzle final de boot do sistema validando a sequência de inicialização
+6. Tela final com medalhas conquistadas, score, tempo total e melhor resultado salvo
 
 ## Puzzles incluídos
 
