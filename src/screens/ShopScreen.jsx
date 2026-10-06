@@ -1,52 +1,33 @@
 import { useState } from 'react'
 import { useGame } from '../hooks/useGame'
 import { useGameAudio } from '../audio/useGameAudio'
-import { SHOP_ITEMS, CATEGORIES, SUPPORT_ITEMS } from '../data/shopItems'
+import { PIECES } from '../data/pieces'
+import { SUPPORT_ITEMS } from '../data/shopItems'
 import hudDino from '../assets/copia-dino.png'
 import './ShopScreen.css'
 
-export default function ShopScreen() {
-  const { coins, score, collectedPieces, spendCoins, selectedSetup, selectSetupItem, goToBoot, supportInventory, buySupportItem, useSupportItem: activateSupportItem } = useGame()
-  const { playButton, playSelect, playPurchase } = useGameAudio()
-  const [activeCategory, setActiveCategory] = useState('gabinete')
-  const [preview, setPreview] = useState(selectedSetup)
+export default function ShopScreen({ onClose }) {
+  const {
+    coins,
+    score,
+    collectedPieces,
+    lives,
+    activePuzzle,
+    supportInventory,
+    buySupportItem,
+    useSupportItem: activateSupportItem,
+    goToBoot,
+    navigateTo,
+  } = useGame()
+  const { playBack } = useGameAudio()
   const [supportMessage, setSupportMessage] = useState('')
-
-  const categoryItems = activeCategory === 'suporte'
-    ? SUPPORT_ITEMS
-    : SHOP_ITEMS.filter(i => i.category === activeCategory)
-
-  function getItem(id) { return SHOP_ITEMS.find(i => i.id === id) }
-
-  function handleSelect(item) {
-    if (item.category === 'suporte') return
-    if (preview[item.category] === item.id) return
-    playSelect()
-    setPreview(prev => ({ ...prev, [item.category]: item.id }))
-  }
+  const isFinalShop = collectedPieces.length === PIECES.length && !onClose
 
   function handleBuy(item) {
-    if (item.category === 'suporte') {
-      const wasPurchased = buySupportItem(item.id)
-      if (wasPurchased) {
-        setSupportMessage(`${item.name} foi adicionado ao inventário.`)
-      } else {
-        setSupportMessage('Você não pode comprar este item agora.')
-      }
-      return
-    }
-
-    if (selectedSetup[item.category] === item.id) return
-    const currentItem = getItem(selectedSetup[item.category])
-    const refund = currentItem?.price ?? 0
-    const cost   = item.price - refund
-    if (cost > coins) return
-    if (cost > 0) {
-      spendCoins(cost)
-      playPurchase()
-    }
-    selectSetupItem(item.category, item.id)
-    setPreview(prev => ({ ...prev, [item.category]: item.id }))
+    const wasPurchased = buySupportItem(item.id)
+    setSupportMessage(wasPurchased
+      ? `${item.name} foi adicionado ao inventário.`
+      : 'Não foi possível comprar este item. Confira suas moedas e o limite do inventário.')
   }
 
   function handleSupportUse(item) {
@@ -54,150 +35,93 @@ export default function ShopScreen() {
     setSupportMessage(result.message)
   }
 
-  function netCost(item) {
-    const current = getItem(selectedSetup[item.category])
-    return Math.max(0, item.price - (current?.price ?? 0))
+  function handleClose() {
+    playBack()
+    if (onClose) {
+      onClose()
+    } else if (isFinalShop) {
+      goToBoot()
+    } else {
+      navigateTo('map')
+    }
   }
 
-  const previewCase  = getItem(preview.gabinete)
-  const previewPad   = getItem(preview.mousepad)
-  const previewLamp  = getItem(preview.abajur)
-  const previewDeco  = getItem(preview.decoracao)
-
-  const setupSlots = [
-    { category: 'gabinete', label: 'GABINETE', item: previewCase },
-    { category: 'mousepad', label: 'MOUSEPAD', item: previewPad },
-    { category: 'abajur', label: 'ILUMINAÇÃO', item: previewLamp },
-    { category: 'decoracao', label: 'DECORAÇÃO', item: previewDeco },
-  ]
-
   return (
-    <main className="arc-root">
+    <main
+      className={`arc-root ${onClose ? 'arc-overlay' : ''}`}
+      role={onClose ? 'dialog' : undefined}
+      aria-modal={onClose ? 'true' : undefined}
+      aria-label={onClose ? 'Loja de suporte' : undefined}
+    >
       <section className="arc-cab">
         <header className="arc-marquee">
           <img className="arc-hud-dino" src={hudDino} alt="" />
-          <h1>MONTE SEU SETUP</h1>
+          <h1>LOJA DE SUPORTE</h1>
         </header>
 
         <section className="arc-hud" aria-label="Status da partida">
           <div className="arc-stat"><small>SCORE</small><b>{String(score).padStart(6, '0')}</b></div>
           <div className="arc-stat"><small>MOEDAS</small><b>🪙 {coins}</b></div>
-          <div className="arc-stat"><small>PEÇAS</small><b>{collectedPieces.length}/11</b></div>
+          <div className="arc-stat"><small>VIDAS</small><b>{'♥'.repeat(lives)}{'♡'.repeat(3 - lives)}</b></div>
           <div className="arc-bar">
             <small>RECUPERAÇÃO</small>
-            <div className="arc-track" role="progressbar" aria-valuenow={collectedPieces.length} aria-valuemin={0} aria-valuemax={11}>
-              <div className="arc-fill" style={{ width: `${(collectedPieces.length / 11) * 100}%` }} />
+            <div className="arc-track" role="progressbar" aria-valuenow={collectedPieces.length} aria-valuemin={0} aria-valuemax={PIECES.length}>
+              <div className="arc-fill" style={{ width: `${(collectedPieces.length / PIECES.length) * 100}%` }} />
             </div>
           </div>
         </section>
 
         <div className="arc-content">
-          <section className="arc-screen-wrap" aria-label="Prévia do setup">
-            <div className="arc-bezel">
-              <div className="arc-title">PREVIEW DO SETUP</div>
-              <div className="arc-screen">
-                <div className="arc-wall">
-                  <div className={`arc-slot ${previewLamp.id === 'lamp-none' ? 'empty' : 'pop'}`}>
-                    <span className="arc-ic">{previewLamp.icon}</span>
-                    <span>{previewLamp.id === 'lamp-none' ? 'ILUMINAÇÃO' : previewLamp.name}</span>
-                  </div>
-                  <div className={`arc-slot ${previewDeco.id === 'deco-none' ? 'empty' : 'pop'}`}>
-                    <span className="arc-ic">{previewDeco.icon}</span>
-                    <span>{previewDeco.id === 'deco-none' ? 'DECORAÇÃO' : previewDeco.name}</span>
-                  </div>
-                  <div className="arc-slot">
-                    <span className="arc-ic">🖥️</span>
-                    <span>DINOBOOT OS</span>
-                  </div>
-                  <div className={`arc-slot ${previewCase ? 'pop' : 'empty'}`}>
-                    <span className="arc-ic">{previewCase.icon}</span>
-                    <span>{previewCase.name}</span>
-                  </div>
-                </div>
-                <div className="arc-desk">
-                  {setupSlots.map(({ category, label, item }) => (
-                    <div className={`arc-slot ${item.id.endsWith('-none') ? 'empty' : 'pop'}`} key={category}>
-                      <span className="arc-ic">{item.icon}</span>
-                      <span>{item.id.endsWith('-none') ? label : item.name}</span>
-                    </div>
-                  ))}
-                  <div className="arc-slot">
-                    <span className="arc-ic">🦕</span>
-                    <span>COMPANHEIRO</span>
-                  </div>
-                </div>
-              </div>
+          <section className="arc-catalog" aria-label="Itens de suporte úteis durante a partida">
+            <div className="arc-store-intro">
+              <h2>ITENS ÚTEIS NA PARTIDA</h2>
+              <p>Compre ferramentas de suporte e use-as quando precisar.</p>
             </div>
-            <button className="arc-confirm" type="button" onClick={goToBoot}>
-              ▶ CONFIRMAR SETUP — IR PARA O BOOT
-            </button>
-          </section>
-
-          <section className="arc-catalog" aria-label="Loja de itens para o setup">
             {supportMessage && <div className="arc-toast-message" role="status">{supportMessage}</div>}
-            <nav className="arc-deck" aria-label="Categorias da loja">
-              <div className="arc-group">
-                {CATEGORIES.map(cat => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    className={`arc-b ${activeCategory === cat.id ? 'on' : ''}`}
-                    aria-pressed={activeCategory === cat.id}
-                    onClick={() => { playButton(); setActiveCategory(cat.id) }}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-            </nav>
 
             <div className="arc-list">
-              {categoryItems.map(item => {
-                const isSupport = item.category === 'suporte'
-                const owned = isSupport ? (supportInventory[item.id] ?? 0) > 0 : selectedSetup[item.category] === item.id
-                const count = isSupport ? (supportInventory[item.id] ?? 0) : 0
-                const isPreviewing = !isSupport && preview[item.category] === item.id
-                const cost = isSupport ? item.price : netCost(item)
-                const canAfford = cost === 0 || coins >= cost
+              {SUPPORT_ITEMS.map(item => {
+                const count = supportInventory[item.id] ?? 0
+                const owned = count > 0
+                const canAfford = coins >= item.price
+                const needsPuzzle = item.id === 'scanner' || item.id === 'manual_tecnico'
+                const canUse = owned && (needsPuzzle ? Boolean(activePuzzle) : lives < 3)
+                const useLabel = needsPuzzle && !activePuzzle
+                  ? 'USE NO PUZZLE'
+                  : item.id === 'kit_tecnico' && lives === 3
+                    ? 'VIDAS CHEIAS'
+                    : `USAR (${count})`
 
                 return (
                   <article
                     key={item.id}
-                    className={`arc-item ${owned ? 'eq' : ''} ${isPreviewing ? 'previewing' : ''} ${!canAfford && !owned ? 'unaffordable' : ''}`}
-                    onClick={() => handleSelect(item)}
-                    onKeyDown={event => {
-                      if (!isSupport && (event.key === 'Enter' || event.key === ' ')) {
-                        event.preventDefault()
-                        handleSelect(item)
-                      }
-                    }}
-                    role={isSupport ? undefined : 'button'}
-                    tabIndex={isSupport ? undefined : 0}
-                    aria-pressed={isSupport ? undefined : isPreviewing}
+                    className={`arc-item ${owned ? 'eq' : ''} ${!canAfford && !owned ? 'unaffordable' : ''}`}
                   >
                     <span className="arc-ic" aria-hidden="true">{item.icon}</span>
                     <div className="arc-item-info">
                       <h3>{item.name}</h3>
                       <p>{item.desc}</p>
-                      {isSupport && count > 0 && <span className="arc-tag">NO INVENTÁRIO: {count}</span>}
-                      {!isSupport && isPreviewing && !owned && <span className="arc-tag preview-tag">EM PRÉVIA</span>}
+                      {owned && <span className="arc-tag">NO INVENTÁRIO: {count}</span>}
                     </div>
                     <div className="arc-item-action">
-                      {isSupport ? (
-                        owned ? (
-                          <button className="arc-buy own" type="button" onClick={event => { event.stopPropagation(); handleSupportUse(item) }}>
-                            USAR ({count})
-                          </button>
-                        ) : (
-                          <button className={`arc-buy ${!canAfford ? 'no' : ''}`} type="button" onClick={event => { event.stopPropagation(); handleBuy(item) }} disabled={!canAfford}>
-                            🪙 {item.price}
-                          </button>
-                        )
-                      ) : owned ? (
-                        <span className="arc-tag">✓ EQUIPADO</span>
+                      {owned ? (
+                        <button
+                          className="arc-buy own"
+                          type="button"
+                          onClick={() => handleSupportUse(item)}
+                          disabled={!canUse}
+                          title={!canUse ? 'Este item não pode ser usado agora.' : undefined}
+                        >
+                          {useLabel}
+                        </button>
                       ) : (
-                        <button className={`arc-buy ${!canAfford ? 'no' : ''}`} type="button" onClick={event => { event.stopPropagation(); handleBuy(item) }} disabled={!canAfford}>
-                          {cost === 0 ? 'GRÁTIS' : `🪙 ${cost}`}
+                        <button
+                          className={`arc-buy ${!canAfford ? 'no' : ''}`}
+                          type="button"
+                          onClick={() => handleBuy(item)}
+                          disabled={!canAfford}
+                        >
+                          🪙 {item.price}
                         </button>
                       )}
                     </div>
@@ -207,6 +131,14 @@ export default function ShopScreen() {
             </div>
           </section>
         </div>
+
+        <button className="arc-confirm" type="button" onClick={handleClose}>
+          {onClose
+            ? '↩ VOLTAR AO PUZZLE'
+            : isFinalShop
+              ? '▶ INICIAR O BOOT FINAL'
+              : '↩ VOLTAR AO MAPA'}
+        </button>
       </section>
     </main>
   )

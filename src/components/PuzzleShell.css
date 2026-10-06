@@ -121,6 +121,7 @@
 .puzzle-hint-wrap {
   display: flex;
   align-items: center;
+  gap: 8px;
   padding: 12px 16px;
 }
 
@@ -141,6 +142,29 @@
   background: rgba(242, 97, 1, 0.2);
   transform: translateY(-1px);
   box-shadow: 0 0 16px rgba(242, 97, 1, 0.2);
+}
+
+.puzzle-shop-btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(145,190,212,0.55);
+  background: rgba(145,190,212,0.1);
+  color: #dfeef8;
+  font-family: var(--game-font);
+  font-size: 7px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.puzzle-shop-btn:hover:not(:disabled) {
+  background: rgba(145,190,212,0.2);
+  transform: translateY(-1px);
+}
+
+.puzzle-shop-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
 }
 
 .puzzle-support-panel {

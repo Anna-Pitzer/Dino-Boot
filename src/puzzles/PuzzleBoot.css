@@ -40,7 +40,6 @@
 .pb-terminal,
 .pb-terminal-bar,
 .pb-terminal-body,
-.pb-setup-banner,
 .pb-phase-list,
 .pb-status-grid,
 .pb-log-box {
@@ -261,43 +260,6 @@
   gap: 12px;
 }
 
-.pb-setup-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: rgba(12, 18, 28, 0.96);
-  border: 1px solid rgba(145,190,212,0.18);
-  border-radius: 10px;
-  padding: 8px 10px;
-}
-
-.pb-banner-label {
-  font-size: 7px;
-  color: #91BED4;
-  letter-spacing: 2px;
-}
-
-.pb-setup-icons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.pb-setup-item {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(46,204,113,0.12);
-  border: 1px solid rgba(46,204,113,0.4);
-  color: #80f0a6;
-  font-size: 8px;
-}
-
 .pb-phase-list {
   display: flex;
   flex-direction: column;
@@ -400,4 +362,3 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
-

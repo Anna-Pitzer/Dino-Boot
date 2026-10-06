@@ -1,20 +1,15 @@
 import { createContext, useState, useEffect } from 'react'
-import { DEFAULT_SETUP, SUPPORT_ITEMS, SUPPORT_NONE_ITEM } from '../data/shopItems'
+import { DEFAULT_SUPPORT_INVENTORY, SUPPORT_ITEMS } from '../data/shopItems'
 import { PIECES } from '../data/pieces'
 import { getRunAchievements, getFinalResult } from '../data/achievements'
+import { PUZZLE_HINTS } from '../data/puzzleHints'
+import { CODEX_ENTRIES } from '../data/codex'
 import { useGameAudio } from '../audio/useGameAudio'
 
 export const GameContext = createContext(null)
 
 const MAX_LIVES = 3
 const SAVE_KEY  = 'dinoboot_save'
-
-const DEFAULT_SUPPORT_INVENTORY = {
-  scanner: 0,
-  manual_tecnico: 0,
-  kit_tecnico: 0,
-  checkpoint: 0,
-}
 
 const DEFAULT_STATE = {
   collectedPieces: [],
@@ -29,13 +24,11 @@ const DEFAULT_STATE = {
   currentScreen:    'start',
   activePuzzle:     null,
   dinoState:        { pieceId: 'cpu', x: null, y: null, flipX: false },
-  selectedSetup:    DEFAULT_SETUP,
   difficulty:       'normal',
   usedHints:        {},
   unlockedAchievements: [],
   discoveredCodex:  {},
   supportInventory: DEFAULT_SUPPORT_INVENTORY,
-  supportCheckpoint: null,
   supportNotes:     {},
 }
 
@@ -69,7 +62,6 @@ export function GameProvider({ children }) {
     playLevelUp,
     playDamage,
     playCoin,
-    playEquip,
     playPurchase,
     playConfirm,
     playBack,
@@ -90,13 +82,11 @@ export function GameProvider({ children }) {
   const [currentScreen,   setCurrentScreen]   = useState(saved?.currentScreen   ?? DEFAULT_STATE.currentScreen)
   const [activePuzzle,    setActivePuzzle]    = useState(saved?.activePuzzle    ?? DEFAULT_STATE.activePuzzle)
   const [dinoState,       setDinoState]       = useState(saved?.dinoState       ?? DEFAULT_STATE.dinoState)
-  const [selectedSetup,   setSelectedSetup]   = useState(saved?.selectedSetup   ?? DEFAULT_STATE.selectedSetup)
   const [difficulty,      setDifficulty]      = useState(saved?.difficulty      ?? DEFAULT_STATE.difficulty)
   const [usedHints,       setUsedHints]       = useState(saved?.usedHints       ?? DEFAULT_STATE.usedHints)
   const [unlockedAchievements, setUnlockedAchievements] = useState(saved?.unlockedAchievements ?? DEFAULT_STATE.unlockedAchievements)
   const [discoveredCodex, setDiscoveredCodex] = useState(saved?.discoveredCodex ?? DEFAULT_STATE.discoveredCodex)
   const [supportInventory, setSupportInventory] = useState(saved?.supportInventory ?? DEFAULT_STATE.supportInventory)
-  const [supportCheckpoint, setSupportCheckpoint] = useState(saved?.supportCheckpoint ?? DEFAULT_STATE.supportCheckpoint)
   const [supportNotes, setSupportNotes] = useState(saved?.supportNotes ?? DEFAULT_STATE.supportNotes)
 
   const outOfLives = lives === 0
@@ -128,8 +118,8 @@ export function GameProvider({ children }) {
       clearSave()
       return
     }
-    writeSave({ collectedPieces, damagedPieces, failedAttempts, lives, score, coins, totalTimeSeconds, bestResult, newlyUnlockedAchievements, currentScreen, activePuzzle, dinoState, selectedSetup, difficulty, usedHints, unlockedAchievements, discoveredCodex, supportInventory, supportCheckpoint, supportNotes })
-  }, [saveEnabled, collectedPieces, damagedPieces, failedAttempts, lives, score, coins, totalTimeSeconds, bestResult, newlyUnlockedAchievements, currentScreen, activePuzzle, dinoState, selectedSetup, difficulty, usedHints, unlockedAchievements, discoveredCodex, supportInventory, supportCheckpoint, supportNotes])
+    writeSave({ collectedPieces, damagedPieces, failedAttempts, lives, score, coins, totalTimeSeconds, bestResult, newlyUnlockedAchievements, currentScreen, activePuzzle, dinoState, difficulty, usedHints, unlockedAchievements, discoveredCodex, supportInventory, supportNotes })
+  }, [saveEnabled, collectedPieces, damagedPieces, failedAttempts, lives, score, coins, totalTimeSeconds, bestResult, newlyUnlockedAchievements, currentScreen, activePuzzle, dinoState, difficulty, usedHints, unlockedAchievements, discoveredCodex, supportInventory, supportNotes])
 
   function navigateTo(screen) {
     if (screen === 'shop') playShop()
@@ -211,11 +201,6 @@ export function GameProvider({ children }) {
     navigateTo('map')
   }
 
-  function selectSetupItem(category, itemId) {
-    playEquip()
-    setSelectedSetup(prev => ({ ...prev, [category]: itemId }))
-  }
-
   function buySupportItem(itemId) {
     const item = SUPPORT_ITEMS.find(entry => entry.id === itemId)
     if (!item) return false
@@ -235,59 +220,30 @@ export function GameProvider({ children }) {
     const owned = supportInventory[itemId] ?? 0
     if (owned <= 0) return { used: false, message: 'Você ainda não possui este item.' }
 
-    setSupportInventory(prev => ({ ...prev, [itemId]: Math.max(0, (prev[itemId] ?? 0) - 1) }))
-    playConfirm()
-
     if (itemId === 'kit_tecnico') {
+      if (lives >= MAX_LIVES) return { used: false, message: 'Você já está com todas as vidas.' }
+      setSupportInventory(prev => ({ ...prev, [itemId]: prev[itemId] - 1 }))
       setLives(prev => Math.min(MAX_LIVES, prev + 1))
+      playConfirm()
       return { used: true, message: 'Kit técnico ativado: +1 vida.' }
     }
 
-    if (itemId === 'checkpoint') {
-      const checkpoint = {
-        collectedPieces: [...collectedPieces],
-        damagedPieces: [...damagedPieces],
-        lives,
-        score,
-        coins,
-        currentScreen,
-        totalTimeSeconds,
-        selectedSetup: { ...selectedSetup },
-        difficulty,
-      }
-      setSupportCheckpoint(checkpoint)
-      return { used: true, message: 'Checkpoint salvo com o progresso atual.' }
-    }
+    if (!activePuzzle) return { used: false, message: 'Este item só pode ser usado durante um puzzle.' }
 
-    if (!activePuzzle) {
-      return { used: true, message: `${item.name} pronto para ser usado no próximo puzzle.` }
-    }
-
-    const piece = PIECES.find(entry => entry.id === activePuzzle)
+    const codexEntry = CODEX_ENTRIES.find(entry => entry.id === activePuzzle)
+    const puzzleHints = PUZZLE_HINTS[activePuzzle]?.hints ?? []
     const note = itemId === 'scanner'
-      ? `SCANNER: ${piece?.name ?? 'componente'} apresenta indicações de ${piece?.concept ?? 'diagnóstico'} e ajuda a focar a correção.`
-      : `MANUAL TÉCNICO: ${piece?.concept ?? 'conceito'} — revise a lógica antes de prosseguir.`
+      ? `SCANNER: ${puzzleHints[0]?.text ?? 'Analise as instruções do componente antes de prosseguir.'}`
+      : `MANUAL TÉCNICO: ${codexEntry?.explanation ?? 'Consulte as informações do componente.'} ${codexEntry?.relation ?? ''}`.trim()
 
+    setSupportInventory(prev => ({ ...prev, [itemId]: prev[itemId] - 1 }))
     setSupportNotes(prev => ({
       ...prev,
       [activePuzzle]: [...(prev[activePuzzle] ?? []), note],
     }))
 
+    playConfirm()
     return { used: true, message: note }
-  }
-
-  function restoreSupportCheckpoint() {
-    if (!supportCheckpoint) return false
-    setCollectedPieces(supportCheckpoint.collectedPieces)
-    setDamagedPieces(supportCheckpoint.damagedPieces)
-    setLives(supportCheckpoint.lives)
-    setScore(supportCheckpoint.score)
-    setCurrentScreen(supportCheckpoint.currentScreen || 'map')
-    setTotalTimeSeconds(supportCheckpoint.totalTimeSeconds ?? 0)
-    setSelectedSetup(supportCheckpoint.selectedSetup ?? DEFAULT_SETUP)
-    setDifficulty(supportCheckpoint.difficulty ?? 'normal')
-    setSupportCheckpoint(null)
-    return true
   }
 
   function goToBoot() {
@@ -356,28 +312,25 @@ export function GameProvider({ children }) {
     setCurrentScreen('start')
     setActivePuzzle(null)
     setDinoState(DEFAULT_STATE.dinoState)
-    setSelectedSetup(DEFAULT_STATE.selectedSetup)
     setDifficulty(DEFAULT_STATE.difficulty)
     setUsedHints(DEFAULT_STATE.usedHints)
     setNewlyUnlockedAchievements(DEFAULT_STATE.newlyUnlockedAchievements)
     setDiscoveredCodex(DEFAULT_STATE.discoveredCodex)
     setSupportInventory(DEFAULT_SUPPORT_INVENTORY)
-    setSupportCheckpoint(DEFAULT_STATE.supportCheckpoint)
     setSupportNotes(DEFAULT_STATE.supportNotes)
   }
 
   return (
     <GameContext.Provider value={{
       collectedPieces, damagedPieces, failedAttempts, lives, outOfLives,
-      score, coins, totalTimeSeconds, bestResult, finalResult, discoveredCodex, newlyUnlockedAchievements, currentScreen, setCurrentScreen, activePuzzle, dinoState, selectedSetup,
+      score, coins, totalTimeSeconds, bestResult, finalResult, discoveredCodex, newlyUnlockedAchievements, currentScreen, setCurrentScreen, activePuzzle, dinoState,
       difficulty, setDifficulty, usedHints, unlockedAchievements,
-      supportInventory, supportCheckpoint, supportNotes,
+      supportInventory, supportNotes,
       startGame, navigateTo, openPuzzle, completePuzzle, failPuzzle,
-      spendCoins, saveDinoState, selectSetupItem, goToBoot, completeGame,
+      spendCoins, saveDinoState, goToBoot, completeGame,
       closePuzzle, goBack, resetGame, registerHintUsage,
-      getHintRewardMultiplier, buySupportItem, useSupportItem, restoreSupportCheckpoint,
+      getHintRewardMultiplier, buySupportItem, useSupportItem,
       hasSupportItem: (itemId) => (supportInventory[itemId] ?? 0) > 0,
-      getSupportItem: (itemId) => SUPPORT_ITEMS.find(entry => entry.id === itemId) ?? SUPPORT_NONE_ITEM,
     }}>
       {children}
     </GameContext.Provider>

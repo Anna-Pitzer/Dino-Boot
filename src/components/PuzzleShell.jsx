@@ -4,6 +4,7 @@ import { useGameAudio } from '../audio/useGameAudio'
 import { PIECES } from '../data/pieces'
 import Timer from './Timer'
 import HintSystem from './HintSystem'
+import ShopScreen from '../screens/ShopScreen'
 import './PuzzleShell.css'
 
 import PuzzleCPU         from '../puzzles/PuzzleCPU'
@@ -35,11 +36,12 @@ const PUZZLE_MAP = {
 
 export default function PuzzleShell() {
   const { activePuzzle, lives, coins, completePuzzle, failPuzzle, closePuzzle, supportNotes } = useGame()
-  const { playCorrect, playWrong, playButton, playBack } = useGameAudio()
+  const { playCorrect, playWrong, playButton, playBack, playShop } = useGameAudio()
   const timerRef = useRef(null)
   const [feedback, setFeedback] = useState(null) // 'success' | 'error' | null
   const [running, setRunning] = useState(true)
   const [hintOpen, setHintOpen] = useState(false)
+  const [shopOpen, setShopOpen] = useState(false)
 
   const piece = PIECES.find(p => p.id === activePuzzle)
   const PuzzleComponent = PUZZLE_MAP[activePuzzle]
@@ -95,11 +97,13 @@ export default function PuzzleShell() {
           </div>
           <div className="puzzle-hint-wrap">
             <button className="puzzle-hint-btn" onClick={() => { playButton(); setHintOpen(true) }}>💡 DICA</button>
+            <button className="puzzle-shop-btn" onClick={() => { playShop(); setShopOpen(true) }} disabled={!!feedback}>🛒 LOJA</button>
           </div>
         </div>
       </div>
 
       {hintOpen && <HintSystem puzzleId={activePuzzle} onClose={() => setHintOpen(false)} />}
+      {shopOpen && <ShopScreen onClose={() => setShopOpen(false)} />}
 
       {activeSupportNotes.length > 0 && (
         <div className="puzzle-support-panel">

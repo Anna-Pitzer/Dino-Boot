@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useGame } from '../hooks/useGame'
 import { useGameAudio } from '../audio/useGameAudio'
-import { SHOP_ITEMS } from '../data/shopItems'
 import './PuzzleBoot.css'
 
 const STEPS_CORRECT = [
@@ -53,7 +52,7 @@ function shuffle(arr) {
 }
 
 export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
-  const { damagedPieces, selectedSetup } = useGame()
+  const { damagedPieces } = useGame()
   const { playBoot, playWrong, playButton } = useGameAudio()
 
   const [queue, setQueue] = useState(() => shuffle(STEPS_CORRECT))
@@ -69,13 +68,6 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
   const [showAnswer, setShowAnswer] = useState(false)
   const [activePhase, setActivePhase] = useState(0)
   const [phaseProgress, setPhaseProgress] = useState(0)
-
-  const setupList = Object.entries(selectedSetup || {})
-    .filter(([key]) => key !== 'suporte')
-    .map(([key, itemId]) => {
-      const item = SHOP_ITEMS.find(entry => entry.id === itemId)
-      return { key, itemId, name: item?.name ?? 'Personalização', icon: item?.icon ?? '⬜' }
-    })
 
   function handleDragStart(id) { setDragging(id) }
   function handleDragOver(e, id) { e.preventDefault(); setDragOver(id) }
@@ -163,17 +155,6 @@ export default function PuzzleBoot({ onSuccess, onFail, timerRef }) {
           </div>
 
           <div className="pb-terminal-body">
-            <div className="pb-setup-banner">
-              <span className="pb-banner-label">SETUP</span>
-              <div className="pb-setup-icons">
-                {setupList.map(({ key, itemId, icon, name }) => (
-                  <span key={key} className="pb-setup-item" title={`${key}: ${name}`}>
-                    {itemId.includes('none') ? '⬜' : icon}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             <div className="pb-phase-list">
               {BOOT_PHASES.map((phase, index) => {
                 const isDone = index < activePhase || (bootFailed && index <= activePhase)

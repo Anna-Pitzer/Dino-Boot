@@ -16,6 +16,13 @@
   image-rendering: pixelated;
 }
 
+.arc-root.arc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  overflow: auto;
+}
+
 .arc-cab {
   max-width: 1320px;
   margin: 0 auto;
@@ -113,7 +120,7 @@
 
 .arc-content {
   display: grid;
-  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.5fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   padding: 14px;
   background: #03060c;
@@ -229,7 +236,9 @@
 }
 
 .arc-confirm {
-  width: 100%;
+  display: block;
+  width: calc(100% - 28px);
+  margin: 0 14px 14px;
   padding: 12px 10px;
   border: 3px solid #ffc08a;
   border-radius: 6px;
@@ -256,6 +265,27 @@
   min-width: 0;
   flex-direction: column;
   gap: 10px;
+}
+
+.arc-store-intro {
+  padding: 12px;
+  border-left: 4px solid var(--or);
+  background: linear-gradient(90deg, #111d36, #0b1424);
+}
+
+.arc-store-intro h2 {
+  margin: 0 0 8px;
+  color: var(--or);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.arc-store-intro p {
+  margin: 0;
+  color: var(--tx);
+  font-size: 7px;
+  line-height: 1.8;
 }
 
 .arc-deck {
@@ -318,11 +348,10 @@
   border-radius: 10px;
   background: linear-gradient(#111d36, #0b1424);
   box-shadow: 0 4px 0 #050a14;
-  cursor: pointer;
+  cursor: default;
 }
 
-.arc-item:hover,
-.arc-item.previewing {
+.arc-item:hover {
   border-color: var(--or);
 }
 
@@ -420,10 +449,6 @@
   font-size: 6px;
   line-height: 1.6;
   letter-spacing: 1px;
-}
-
-.preview-tag {
-  color: var(--or2);
 }
 
 .arc-toast-message {

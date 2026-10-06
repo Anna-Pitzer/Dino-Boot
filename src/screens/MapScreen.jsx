@@ -227,6 +227,7 @@ export default function MapScreen() {
                 </div>
 
                 <div className="arc-group">
+                  <button className="arc-b" onClick={() => { playButton(); navigateTo('shop') }} type="button">LOJA</button>
                   <button className="arc-b g" onClick={() => { playButton(); setDiagnosticOpen(true) }} type="button">DIAGNÓSTICO</button>
                   <button className="arc-b" onClick={() => { playButton(); navigateTo('codex') }} type="button">CODEX</button>
                   <button className="arc-b m" onClick={() => { playButton(); resetGame() }} type="button">REINICIAR</button>
